@@ -27,7 +27,7 @@ export default async function ProductPage({
 
       {/* Back link */}
       <Link
-        href={`/LE{lang}/products`}
+        href={`/${lang}/products`}
         style={{ color: '#6b7280', textDecoration: 'none', fontSize: '14px' }}
       >
         ← {isAr ? 'العودة للمنتجات' : 'Back to products'}
@@ -64,7 +64,7 @@ export default async function ProductPage({
           <h1 style={{ fontSize: '28px', margin: '0 0 1rem' }}>{name}</h1>
 
           <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#16a34a', margin: '0 0 1rem' }}>
-            ${product.price}
+            LE {product.price}
           </p>
 
           <p style={{ color: '#374151', lineHeight: '1.7', margin: '0 0 1.5rem' }}>
