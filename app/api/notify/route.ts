@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     // Build the message
     const itemsList = items
       .map((item: { name: string; quantity: number; price: number }) =>
-        `  • ${item.name} x${item.quantity} — $${(item.price * item.quantity).toFixed(2)}`
+        `  • ${item.name} x${item.quantity} — LE ${(item.price * item.quantity).toFixed(2)}`
       )
       .join('\n');
 
@@ -41,8 +41,8 @@ export async function POST(req: NextRequest) {
     🛍️ *Items:*
     ${itemsList}
 
-    ${discount ? `🎟️ *Promo Code:* ${promoCode} (−$${discount})` : ''}
-    💰 *Total: $${total}*
+    ${discount ? `🎟️ *Promo Code:* ${promoCode} (−LE ${discount})` : ''}
+    💰 *Total: LE ${total}*
     💵 Payment: Cash on Delivery
 
     🔗 [View in Admin](${process.env.NEXT_PUBLIC_SITE_URL}/admin/orders)
