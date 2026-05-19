@@ -1,0 +1,32 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "products": "المنتجات",
+    "cart": "السلة",
+    "account": "حسابي"
+  },
+  "home": {
+    "title": "مرحباً بك في متجرنا",
+    "subtitle": "تصفح أحدث منتجاتنا"
+  },
+  "product": {
+    "addToCart": "أضف إلى السلة",
+    "outOfStock": "نفذ المخزون",
+    "price": "السعر"
+  },
+  "checkout": {
+    "title": "أكمل طلبك",
+    "name": "الاسم الكامل",
+    "phone": "رقم الهاتف",
+    "address": "عنوان التوصيل",
+    "placeOrder": "تأكيد الطلب",
+    "cod": "الدفع عند الاستلام"
+  },
+  "orders": {
+    "pending": "قيد الانتظار",
+    "confirmed": "مؤكد",
+    "shipped": "تم الشحن",
+    "delivered": "تم التسليم",
+    "cancelled": "ملغي"
+  }
+}
