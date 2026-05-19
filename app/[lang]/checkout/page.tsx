@@ -314,11 +314,11 @@ export default function CheckoutPage() {
                     {isAr ? item.name_ar : item.name_en}
                   </p>
                   <p style={{ margin: 0, fontSize: '13px', color: '#9ca3af' }}>
-                    ${item.price} × {item.quantity}
+                    LE {item.price} × {item.quantity}
                   </p>
                 </div>
                 <p style={{ margin: 0, fontWeight: '700' }}>
-                  ${(item.price * item.quantity).toFixed(2)}
+                  LE {(item.price * item.quantity).toFixed(2)}
                 </p>
               </div>
             ))}
@@ -333,7 +333,7 @@ export default function CheckoutPage() {
               color: '#6b7280',
             }}>
               <span>{isAr ? 'المجموع الفرعي' : 'Subtotal'}</span>
-              <span>${total.toFixed(2)}</span>
+              <span>LE {total.toFixed(2)}</span>
             </div>
 
             {/* Discount row */}
@@ -348,7 +348,7 @@ export default function CheckoutPage() {
                 background: '#f0fdf4',
               }}>
                 <span>🎟️ {promo?.code}</span>
-                <span>− ${discount.toFixed(2)}</span>
+                <span>− LE {discount.toFixed(2)}</span>
               </div>
             )}
 
@@ -364,7 +364,7 @@ export default function CheckoutPage() {
                 {isAr ? 'المجموع الكلي' : 'Total'}
               </p>
               <p style={{ margin: 0, fontWeight: '800', color: '#fff', fontSize: '22px' }}>
-                ${finalTotal.toFixed(2)}
+                LE {finalTotal.toFixed(2)}
               </p>
             </div>
           </div>
