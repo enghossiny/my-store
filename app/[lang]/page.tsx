@@ -56,7 +56,7 @@ export default async function HomePage({
           textTransform: 'uppercase',
           margin: '0 0 1rem',
         }}>
-          {isAr ? '🎉 متجر رقم 1' : '🎉 The #1 Store'}
+          {isAr ? '🎉 متجر رقم 1 فى مصر' : '🎉 The #1 Store In Egypt'}
         </p>
         <h1 style={{
           color: '#fff',
