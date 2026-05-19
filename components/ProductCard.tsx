@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 
 type Product = {
@@ -39,7 +41,6 @@ export default function ProductCard({
           (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 20px rgba(108,99,255,0.08)';
         }}
       >
-        {/* Image area */}
         <div style={{
           width: '100%',
           height: '200px',
@@ -86,7 +87,6 @@ export default function ProductCard({
           )}
         </div>
 
-        {/* Info */}
         <div style={{ padding: '1rem 1.25rem' }}>
           <h3 style={{
             margin: '0 0 8px',

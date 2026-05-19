@@ -27,89 +27,106 @@ export default function CheckoutPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async () => {
-    if (!form.name || !form.phone || !form.address) {
-      setError(isAr ? 'يرجى ملء جميع الحقول المطلوبة' : 'Please fill in all required fields');
-      return;
-    }
+const handleSubmit = async () => {
+  if (!form.name || !form.phone || !form.address) {
+    setError(isAr ? 'يرجى ملء جميع الحقول المطلوبة' : 'Please fill in all required fields');
+    return;
+  }
+  if (items.length === 0) {
+    setError(isAr ? 'السلة فارغة' : 'Your cart is empty');
+    return;
+  }
 
-    if (items.length === 0) {
-      setError(isAr ? 'السلة فارغة' : 'Your cart is empty');
-      return;
-    }
+  setLoading(true);
+  setError('');
 
-    setLoading(true);
-    setError('');
+  try {
+    // 1. Create or find customer
+    let customerId = null;
+    const { data: existingCustomer } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('phone', form.phone)
+      .single();
 
-    try {
-      // 1. Create or find customer
-      let customerId = null;
-
-      const { data: existingCustomer } = await supabase
+    if (existingCustomer) {
+      customerId = existingCustomer.id;
+    } else {
+      const { data: newCustomer, error: customerError } = await supabase
         .from('customers')
-        .select('id')
-        .eq('phone', form.phone)
-        .single();
-
-      if (existingCustomer) {
-        customerId = existingCustomer.id;
-      } else {
-        const { data: newCustomer, error: customerError } = await supabase
-          .from('customers')
-          .insert({
-            name: form.name,
-            phone: form.phone,
-            address: form.address,
-          })
-          .select('id')
-          .single();
-
-        if (customerError) throw customerError;
-        customerId = newCustomer.id;
-      }
-
-      // 2. Create the order
-        const { data: order, error: orderError } = await supabase
-        .from('orders')
         .insert({
-            customer_id: customerId,
-            auth_id: (await supabase.auth.getUser()).data.user?.id ?? null,
-            status: 'pending',
-            total: total,
-            address: form.address,
-            phone: form.phone,
-            notes: form.notes,
+          name: form.name,
+          phone: form.phone,
+          address: form.address,
         })
         .select('id')
         .single();
-
-      if (orderError) throw orderError;
-
-      // 3. Create order items
-      const orderItems = items.map((item) => ({
-        order_id: order.id,
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      // 4. Clear cart and redirect to success
-      clearCart();
-      router.push(`/${lang}/checkout/success?order=${order.id}`);
-
-    } catch (err) {
-      console.error(err);
-      setError(isAr ? 'حدث خطأ، يرجى المحاولة مجدداً' : 'Something went wrong, please try again');
-    } finally {
-      setLoading(false);
+      if (customerError) throw customerError;
+      customerId = newCustomer.id;
     }
-  };
+
+    // 2. Create the order
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        customer_id: customerId,
+        auth_id: (await supabase.auth.getUser()).data.user?.id ?? null,
+        status: 'pending',
+        total: total,
+        address: form.address,
+        phone: form.phone,
+        notes: form.notes,
+      })
+      .select('id')
+      .single();
+    if (orderError) throw orderError;
+
+    // 3. Create order items
+    const orderItems = items.map((item) => ({
+      order_id: order.id,
+      product_id: item.id,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(orderItems);
+    if (itemsError) throw itemsError;
+
+    // 4. Send Telegram notification
+    try {
+      await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.id,
+          customerName: form.name,
+          phone: form.phone,
+          address: form.address,
+          notes: form.notes,
+          total: total.toFixed(2),
+          items: items.map((item) => ({
+            name: item.name_en,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }),
+      });
+    } catch (err) {
+      console.error('Notification error:', err);
+    }
+
+    // 5. Clear cart and go to success
+    clearCart();
+    router.push(`/${lang}/checkout/success?order=${order.id}`);
+
+  } catch (err) {
+    console.error(err);
+    setError(isAr ? 'حدث خطأ، يرجى المحاولة مجدداً' : 'Something went wrong, please try again');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Empty cart
   if (items.length === 0) {
