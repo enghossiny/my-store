@@ -11,6 +11,8 @@ export async function POST(req: NextRequest) {
       total,
       items,
       notes,
+      discount,
+      promoCode,
     } = body;
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -28,21 +30,22 @@ export async function POST(req: NextRequest) {
       .join('\n');
 
     const message = `
-🛒 *New Order Received!*
+    🛒 *New Order Received!*
 
-📦 *Order ID:* \`${orderId.slice(0, 8)}...\`
-👤 *Customer:* ${customerName}
-📞 *Phone:* ${phone}
-📍 *Address:* ${address}
-${notes ? `📝 *Notes:* ${notes}` : ''}
+    📦 *Order ID:* \`${orderId.slice(0, 8)}...\`
+    👤 *Customer:* ${customerName}
+    📞 *Phone:* ${phone}
+    📍 *Address:* ${address}
+    ${notes ? `📝 *Notes:* ${notes}` : ''}
 
-🛍️ *Items:*
-${itemsList}
+    🛍️ *Items:*
+    ${itemsList}
 
-💰 *Total: $${total}*
-💵 Payment: Cash on Delivery
+    ${discount ? `🎟️ *Promo Code:* ${promoCode} (−$${discount})` : ''}
+    💰 *Total: $${total}*
+    💵 Payment: Cash on Delivery
 
-🔗 [View in Admin](${process.env.NEXT_PUBLIC_SITE_URL}/admin/orders)
+    🔗 [View in Admin](${process.env.NEXT_PUBLIC_SITE_URL}/admin/orders)
     `.trim();
 
     const response = await fetch(

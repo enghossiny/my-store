@@ -26,12 +26,13 @@ export default function AdminLayout({
             </div>
 
             <nav style={{ padding: '1rem 0', flex: 1 }}>
-              {[
-                { href: '/admin', label: 'Overview', icon: '📊' },
-                { href: '/admin/orders', label: 'Orders', icon: '📦' },
-                { href: '/admin/products', label: 'Products', icon: '🛍️' },
-                { href: '/admin/customers', label: 'Customers', icon: '👥' },
-              ].map((item) => (
+            {[
+              { href: '/admin', label: 'Overview', icon: '📊' },
+              { href: '/admin/orders', label: 'Orders', icon: '📦' },
+              { href: '/admin/products', label: 'Products', icon: '🛍️' },
+              { href: '/admin/customers', label: 'Customers', icon: '👥' },
+              { href: '/admin/promos', label: 'Promo Codes', icon: '🎟️' },
+            ].map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
