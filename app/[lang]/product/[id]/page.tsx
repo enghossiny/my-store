@@ -27,7 +27,7 @@ export default async function ProductPage({
 
       {/* Back link */}
       <Link
-        href={`/${lang}/products`}
+        href={`/LE{lang}/products`}
         style={{ color: '#6b7280', textDecoration: 'none', fontSize: '14px' }}
       >
         ← {isAr ? 'العودة للمنتجات' : 'Back to products'}
