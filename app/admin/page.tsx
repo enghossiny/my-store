@@ -46,7 +46,7 @@ export default async function AdminPage() {
           { label: 'Total Orders', value: totalOrders ?? 0, icon: '📦' },
           { label: 'Total Products', value: totalProducts ?? 0, icon: '🛍️' },
           { label: 'Total Customers', value: totalCustomers ?? 0, icon: '👥' },
-          { label: 'Revenue (Delivered)', value: `$${totalRevenue.toFixed(2)}`, icon: '💰' },
+          { label: 'Revenue (Delivered)', value: `LE ${totalRevenue.toFixed(2)}`, icon: '💰' },
         ].map((stat) => (
           <div key={stat.label} style={{
             background: '#fff',
