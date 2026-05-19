@@ -51,7 +51,7 @@ export default function CartPage() {
                 {isAr ? item.name_ar : item.name_en}
               </p>
               <p style={{ margin: 0, color: '#16a34a', fontWeight: 'bold' }}>
-                ${item.price}
+                LE {item.price}
               </p>
             </div>
 
@@ -82,7 +82,7 @@ export default function CartPage() {
               </div>
 
               <p style={{ margin: 0, fontWeight: 'bold', minWidth: '60px', textAlign: 'right' }}>
-                ${(item.price * item.quantity).toFixed(2)}
+                LE {(item.price * item.quantity).toFixed(2)}
               </p>
 
               <button
@@ -110,7 +110,7 @@ export default function CartPage() {
             {isAr ? 'المجموع' : 'Total'}
           </p>
           <p style={{ margin: 0, fontSize: '28px', fontWeight: 'bold' }}>
-            ${total.toFixed(2)}
+            LE {total.toFixed(2)}
           </p>
         </div>
 
