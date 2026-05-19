@@ -45,7 +45,7 @@ export default function Navbar({ lang }: { lang: string }) {
           fontSize: '20px',
           letterSpacing: '-0.5px',
         }}>
-          {isAr ? 'فور كلين' : 'For Clean'}
+          {isAr ? 'نور سوفت' : 'Nour Soft'}
         </span>
       </Link>
 
