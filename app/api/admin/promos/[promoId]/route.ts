@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { isAdminAuthenticated } from '@/app/admin/auth';
 
-export async function PATCH(req: NextRequest, { params }: { params: { promoId: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ promoId: string }> }) {
+  const { promoId } = await params;
   if (!await isAdminAuthenticated()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { promoId } = params;
   const { active } = await req.json();
 
   if (active == null) {
@@ -23,12 +23,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { promoId: s
   return NextResponse.json({ success: true, promo: data });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { promoId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ promoId: string }> }) {
+  const { promoId } = await params;
   if (!await isAdminAuthenticated()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { promoId } = params;
   const { error } = await supabaseAdmin.from('promo_codes').delete().eq('id', promoId);
 
   if (error) {

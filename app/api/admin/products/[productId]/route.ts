@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { isAdminAuthenticated } from '@/app/admin/auth';
 
-export async function PUT(req: NextRequest, { params }: { params: { productId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ productId: string }> }) {
+  const { productId } = await params;
   if (!await isAdminAuthenticated()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { productId } = params;
   const body = await req.json();
   const {
     name_en,
@@ -42,12 +42,12 @@ export async function PUT(req: NextRequest, { params }: { params: { productId: s
   return NextResponse.json({ success: true, product: data });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { productId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ productId: string }> }) {
+  const { productId } = await params;
   if (!await isAdminAuthenticated()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { productId } = params;
   const { error } = await supabaseAdmin.from('products').delete().eq('id', productId);
 
   if (error) {

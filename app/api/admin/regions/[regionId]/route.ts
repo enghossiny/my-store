@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { isAdminAuthenticated } from '@/app/admin/auth';
 
-export async function PATCH(req: NextRequest, { params }: { params: { regionId: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ regionId: string }> }) {
+  const { regionId } = await params;
   if (!await isAdminAuthenticated()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { regionId } = params;
   const { active } = await req.json();
   if (active == null) {
     return NextResponse.json({ error: 'Missing active state' }, { status: 400 });
@@ -22,12 +22,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { regionId: 
   return NextResponse.json({ success: true, region: data });
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { regionId: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ regionId: string }> }) {
+  const { regionId } = await params;
   if (!await isAdminAuthenticated()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { regionId } = params;
   const { name_en, name_ar, delivery_fee } = await req.json();
   if (!name_en || !name_ar || delivery_fee == null) {
     return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
@@ -46,12 +46,12 @@ export async function PUT(req: NextRequest, { params }: { params: { regionId: st
   return NextResponse.json({ success: true, region: data });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { regionId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ regionId: string }> }) {
+  const { regionId } = await params;
   if (!await isAdminAuthenticated()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { regionId } = params;
   const { error } = await supabaseAdmin.from('delivery_regions').delete().eq('id', regionId);
 
   if (error) {
