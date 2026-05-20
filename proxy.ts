@@ -9,20 +9,33 @@ const intlMiddleware = createMiddleware({
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Protect admin routes (except login page and api)
-  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+  // Skip API routes completely
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
+  // Skip static files
+  if (pathname.startsWith('/_next') || pathname.includes('.')) {
+    return NextResponse.next();
+  }
+
+  // Admin login page — always allow
+  if (pathname === '/admin/login') {
+    return NextResponse.next();
+  }
+
+  // Protect all other admin routes
+  if (pathname.startsWith('/admin')) {
     const session = req.cookies.get('admin_session')?.value;
     if (session !== 'authenticated') {
-      return NextResponse.redirect(new URL('/admin/login', req.url));
+      const loginUrl = new URL('/admin/login', req.url);
+      return NextResponse.redirect(loginUrl);
     }
+    return NextResponse.next();
   }
 
-  // Apply intl middleware to non-admin routes
-  if (!pathname.startsWith('/admin') && !pathname.startsWith('/api')) {
-    return intlMiddleware(req);
-  }
-
-  return NextResponse.next();
+  // Apply intl middleware to store routes
+  return intlMiddleware(req);
 }
 
 export const config = {
