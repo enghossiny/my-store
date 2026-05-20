@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server';
 import { CartProvider } from '@/lib/cartContext';
 import { AuthProvider } from '@/lib/authContext';
 import Navbar from '@/components/Navbar';
+import BottomNav from '@/components/BottomNav';
 
 export default async function LocaleLayout({
   children,
@@ -18,6 +19,7 @@ export default async function LocaleLayout({
   return (
     <html lang={lang} dir={isRTL ? 'rtl' : 'ltr'}>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
@@ -33,6 +35,7 @@ export default async function LocaleLayout({
             <CartProvider>
               <Navbar lang={lang} />
               {children}
+              <BottomNav lang={lang} />
             </CartProvider>
           </AuthProvider>
         </NextIntlClientProvider>

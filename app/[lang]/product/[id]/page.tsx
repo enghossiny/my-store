@@ -23,7 +23,7 @@ export default async function ProductPage({
   const description = isAr ? product.description_ar : product.description_en;
 
   return (
-    <main style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+    <main style={{ padding: '1.5rem 1rem', maxWidth: '1000px', margin: '0 auto' }}>
 
       {/* Back link */}
       <Link
@@ -33,7 +33,14 @@ export default async function ProductPage({
         ← {isAr ? 'العودة للمنتجات' : 'Back to products'}
       </Link>
 
-      <div style={{
+      <>
+      <style>{`
+        .product-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+        @media (min-width: 640px) {
+          .product-grid { grid-template-columns: 1fr 1fr !important; gap: 2.5rem !important; }
+        }
+      `}</style>
+      <div className="product-grid" style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: '3rem',
@@ -114,6 +121,10 @@ export default async function ProductPage({
           )}
         </div>
       </div>
+      </>
+
     </main>
+    
   );
+  
 }

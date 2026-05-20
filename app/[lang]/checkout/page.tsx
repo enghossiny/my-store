@@ -170,7 +170,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+    <main style={{ padding: '1.5rem 1rem', maxWidth: '900px', margin: '0 auto' }}>
       <h1 style={{
         marginBottom: '2rem',
         background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
@@ -182,7 +182,14 @@ export default function CheckoutPage() {
         {isAr ? 'إتمام الطلب' : 'Checkout'}
       </h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+      <>
+      <style>{`
+        .checkout-grid { grid-template-columns: 1fr !important; }
+        @media (min-width: 768px) {
+          .checkout-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+      `}</style>
+      <div className="checkout-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
 
         {/* Left — form */}
         <div>
@@ -370,6 +377,7 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+      </>
     </main>
   );
 }
