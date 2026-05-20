@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function RegionForm() {
@@ -22,16 +21,25 @@ export default function RegionForm() {
     }
     setSaving(true);
     setError('');
-    const { error: err } = await supabase.from('delivery_regions').insert({
-      name_en: form.name_en,
-      name_ar: form.name_ar,
-      delivery_fee: parseFloat(form.delivery_fee),
+
+    const response = await fetch('/api/admin/regions', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name_en: form.name_en,
+        name_ar: form.name_ar,
+        delivery_fee: form.delivery_fee,
+      }),
     });
-    if (err) {
-      setError(err.message || 'Failed to add region');
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      setError(result.error || 'Failed to add region');
       setSaving(false);
       return;
     }
+
     setForm({ name_en: '', name_ar: '', delivery_fee: '' });
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);

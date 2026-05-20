@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 
@@ -40,17 +39,25 @@ export default function EditProductModal({
     setSaving(true);
     setError('');
 
-    const { error: updateError } = await supabase.from('products').update({
-      name_en: form.name_en, name_ar: form.name_ar,
-      description_en: form.description_en, description_ar: form.description_ar,
-      price: parseFloat(form.price),
-      stock: parseInt(form.stock) || 0,
-      category_id: form.category_id || null,
-      images,
-    }).eq('id', product.id);
+    const response = await fetch(`/api/admin/products/${product.id}`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name_en: form.name_en,
+        name_ar: form.name_ar,
+        description_en: form.description_en,
+        description_ar: form.description_ar,
+        price: form.price,
+        stock: form.stock,
+        category_id: form.category_id || null,
+        images,
+      }),
+    });
+    const result = await response.json();
 
-    if (updateError) {
-      setError(updateError.message || 'Failed to save product');
+    if (!response.ok || result.error) {
+      setError(result.error || 'Failed to save product');
       setSaving(false);
       return;
     }

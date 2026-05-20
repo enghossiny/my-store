@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function ToggleRegionButton({ regionId, active }: { regionId: string; active: boolean }) {
@@ -11,12 +10,21 @@ export default function ToggleRegionButton({ regionId, active }: { regionId: str
 
   const handleToggle = async () => {
     setSaving(true);
-    const { error } = await supabase.from('delivery_regions').update({ active: !current }).eq('id', regionId);
-    if (error) {
-      alert(error.message || 'Failed to update region status');
+
+    const response = await fetch(`/api/admin/regions/${regionId}`, {
+      method: 'PATCH',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !current }),
+    });
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      alert(result.error || 'Failed to update region status');
       setSaving(false);
       return;
     }
+
     setCurrent(!current);
     setSaving(false);
     router.refresh();

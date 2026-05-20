@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function TogglePromoButton({
@@ -16,15 +15,21 @@ export default function TogglePromoButton({
 
   const handleToggle = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from('promo_codes')
-      .update({ active: !current })
-      .eq('id', promoId);
-    if (error) {
-      alert(error.message || 'Failed to update promo status');
+
+    const response = await fetch(`/api/admin/promos/${promoId}`, {
+      method: 'PATCH',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !current }),
+    });
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      alert(result.error || 'Failed to update promo status');
       setSaving(false);
       return;
     }
+
     setCurrent(!current);
     setSaving(false);
     router.refresh();

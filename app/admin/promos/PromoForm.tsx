@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function PromoForm() {
@@ -29,20 +28,23 @@ export default function PromoForm() {
     setSaving(true);
     setError('');
 
-    const { error: insertError } = await supabase.from('promo_codes').insert({
-      code: form.code.trim().toUpperCase(),
-      discount_type: form.discount_type,
-      discount_value: parseFloat(form.discount_value),
-      min_order_amount: parseFloat(form.min_order_amount) || 0,
-      max_uses: form.max_uses ? parseInt(form.max_uses) : null,
-      expires_at: form.expires_at || null,
-      active: true,
+    const response = await fetch('/api/admin/promos', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: form.code,
+        discount_type: form.discount_type,
+        discount_value: form.discount_value,
+        min_order_amount: form.min_order_amount,
+        max_uses: form.max_uses,
+        expires_at: form.expires_at,
+      }),
     });
+    const result = await response.json();
 
-    if (insertError) {
-      setError(insertError.message.includes('unique')
-        ? 'This code already exists'
-        : 'Failed to create promo code');
+    if (!response.ok || result.error) {
+      setError(result.error || 'Failed to create promo code');
       setSaving(false);
       return;
     }

@@ -1,6 +1,5 @@
 'use client';
 
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function DeleteProductButton({ productId }: { productId: string }) {
@@ -8,11 +7,18 @@ export default function DeleteProductButton({ productId }: { productId: string }
 
   const handleDelete = async () => {
     if (!confirm('Delete this product?')) return;
-    const { error } = await supabase.from('products').delete().eq('id', productId);
-    if (error) {
-      alert(error.message || 'Failed to delete product');
+
+    const response = await fetch(`/api/admin/products/${productId}`, {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    });
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      alert(result.error || 'Failed to delete product');
       return;
     }
+
     router.refresh();
   };
 

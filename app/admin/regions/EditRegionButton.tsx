@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 type Region = { id: string; name_en: string; name_ar: string; delivery_fee: number };
@@ -20,16 +19,25 @@ export default function EditRegionButton({ region }: { region: Region }) {
   const handleSave = async () => {
     setSaving(true);
     setError('');
-    const { error } = await supabase.from('delivery_regions').update({
-      name_en: form.name_en,
-      name_ar: form.name_ar,
-      delivery_fee: parseFloat(form.delivery_fee),
-    }).eq('id', region.id);
-    if (error) {
-      setError(error.message || 'Failed to save region');
+
+    const response = await fetch(`/api/admin/regions/${region.id}`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name_en: form.name_en,
+        name_ar: form.name_ar,
+        delivery_fee: form.delivery_fee,
+      }),
+    });
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      setError(result.error || 'Failed to save region');
       setSaving(false);
       return;
     }
+
     setSaving(false);
     setOpen(false);
     router.refresh();

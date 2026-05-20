@@ -1,17 +1,23 @@
 'use client';
 
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function DeleteRegionButton({ regionId }: { regionId: string }) {
   const router = useRouter();
   const handleDelete = async () => {
     if (!confirm('Delete this region?')) return;
-    const { error } = await supabase.from('delivery_regions').delete().eq('id', regionId);
-    if (error) {
-      alert(error.message || 'Failed to delete region');
+
+    const response = await fetch(`/api/admin/regions/${regionId}`, {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    });
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      alert(result.error || 'Failed to delete region');
       return;
     }
+
     router.refresh();
   };
   return (

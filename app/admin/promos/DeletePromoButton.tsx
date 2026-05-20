@@ -1,6 +1,5 @@
 'use client';
 
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function DeletePromoButton({ promoId }: { promoId: string }) {
@@ -8,11 +7,18 @@ export default function DeletePromoButton({ promoId }: { promoId: string }) {
 
   const handleDelete = async () => {
     if (!confirm('Delete this promo code?')) return;
-    const { error } = await supabase.from('promo_codes').delete().eq('id', promoId);
-    if (error) {
-      alert(error.message || 'Failed to delete promo code');
+
+    const response = await fetch(`/api/admin/promos/${promoId}`, {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    });
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      alert(result.error || 'Failed to delete promo code');
       return;
     }
+
     router.refresh();
   };
 
