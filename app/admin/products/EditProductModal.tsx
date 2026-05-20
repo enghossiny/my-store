@@ -30,6 +30,7 @@ export default function EditProductModal({
   const [images, setImages] = useState<string[]>(product.images ?? []);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -37,7 +38,9 @@ export default function EditProductModal({
 
   const handleSave = async () => {
     setSaving(true);
-    await supabase.from('products').update({
+    setError('');
+
+    const { error: updateError } = await supabase.from('products').update({
       name_en: form.name_en, name_ar: form.name_ar,
       description_en: form.description_en, description_ar: form.description_ar,
       price: parseFloat(form.price),
@@ -45,6 +48,13 @@ export default function EditProductModal({
       category_id: form.category_id || null,
       images,
     }).eq('id', product.id);
+
+    if (updateError) {
+      setError(updateError.message || 'Failed to save product');
+      setSaving(false);
+      return;
+    }
+
     setSuccess(true);
     setSaving(false);
     router.refresh();
@@ -147,6 +157,11 @@ export default function EditProductModal({
               <ImageUploader onUpload={(url) => setImages([...images, url])} />
             </div>
 
+            {error && (
+              <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '1rem' }}>
+                ❌ {error}
+              </p>
+            )}
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={handleSave} disabled={saving} style={{
                 flex: 1, padding: '12px',

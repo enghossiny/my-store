@@ -54,7 +54,7 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
     });
 
     if (insertError) {
-      setError('Failed to save product');
+      setError(insertError.message || 'Failed to save product');
       setSaving(false);
       return;
     }

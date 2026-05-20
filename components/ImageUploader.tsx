@@ -46,9 +46,15 @@ export default function ImageUploader({ onUpload }: Props) {
     }
 
     // Get public URL
-    const { data } = supabase.storage
+    const { data, error: publicUrlError } = supabase.storage
       .from('product-images')
       .getPublicUrl(filename);
+
+    if (publicUrlError || !data?.publicUrl) {
+      setError('Failed to get public image URL');
+      setUploading(false);
+      return;
+    }
 
     setPreview(data.publicUrl);
     onUpload(data.publicUrl);

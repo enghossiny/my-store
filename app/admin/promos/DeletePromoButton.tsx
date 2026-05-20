@@ -8,7 +8,11 @@ export default function DeletePromoButton({ promoId }: { promoId: string }) {
 
   const handleDelete = async () => {
     if (!confirm('Delete this promo code?')) return;
-    await supabase.from('promo_codes').delete().eq('id', promoId);
+    const { error } = await supabase.from('promo_codes').delete().eq('id', promoId);
+    if (error) {
+      alert(error.message || 'Failed to delete promo code');
+      return;
+    }
     router.refresh();
   };
 

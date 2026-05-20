@@ -8,7 +8,11 @@ export default function DeleteProductButton({ productId }: { productId: string }
 
   const handleDelete = async () => {
     if (!confirm('Delete this product?')) return;
-    await supabase.from('products').delete().eq('id', productId);
+    const { error } = await supabase.from('products').delete().eq('id', productId);
+    if (error) {
+      alert(error.message || 'Failed to delete product');
+      return;
+    }
     router.refresh();
   };
 

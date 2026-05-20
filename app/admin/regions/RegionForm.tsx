@@ -27,7 +27,11 @@ export default function RegionForm() {
       name_ar: form.name_ar,
       delivery_fee: parseFloat(form.delivery_fee),
     });
-    if (err) { setError('Failed to add region'); setSaving(false); return; }
+    if (err) {
+      setError(err.message || 'Failed to add region');
+      setSaving(false);
+      return;
+    }
     setForm({ name_en: '', name_ar: '', delivery_fee: '' });
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);

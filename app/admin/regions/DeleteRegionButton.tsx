@@ -7,7 +7,11 @@ export default function DeleteRegionButton({ regionId }: { regionId: string }) {
   const router = useRouter();
   const handleDelete = async () => {
     if (!confirm('Delete this region?')) return;
-    await supabase.from('delivery_regions').delete().eq('id', regionId);
+    const { error } = await supabase.from('delivery_regions').delete().eq('id', regionId);
+    if (error) {
+      alert(error.message || 'Failed to delete region');
+      return;
+    }
     router.refresh();
   };
   return (

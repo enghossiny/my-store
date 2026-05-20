@@ -16,10 +16,15 @@ export default function TogglePromoButton({
 
   const handleToggle = async () => {
     setSaving(true);
-    await supabase
+    const { error } = await supabase
       .from('promo_codes')
       .update({ active: !current })
       .eq('id', promoId);
+    if (error) {
+      alert(error.message || 'Failed to update promo status');
+      setSaving(false);
+      return;
+    }
     setCurrent(!current);
     setSaving(false);
     router.refresh();

@@ -15,14 +15,21 @@ export default function EditRegionButton({ region }: { region: Region }) {
     delivery_fee: String(region.delivery_fee),
   });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSave = async () => {
     setSaving(true);
-    await supabase.from('delivery_regions').update({
+    setError('');
+    const { error } = await supabase.from('delivery_regions').update({
       name_en: form.name_en,
       name_ar: form.name_ar,
       delivery_fee: parseFloat(form.delivery_fee),
     }).eq('id', region.id);
+    if (error) {
+      setError(error.message || 'Failed to save region');
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     setOpen(false);
     router.refresh();
@@ -79,6 +86,11 @@ export default function EditRegionButton({ region }: { region: Region }) {
               </div>
             </div>
 
+            {error && (
+              <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '1rem' }}>
+                ❌ {error}
+              </p>
+            )}
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={handleSave} disabled={saving} style={{
                 flex: 1, padding: '12px',
