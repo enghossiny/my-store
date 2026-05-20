@@ -17,29 +17,21 @@ export default async function LocaleLayout({
   const isRTL = lang === 'ar';
 
   return (
-    <html lang={lang} dir={isRTL ? 'rtl' : 'ltr'}>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
-      </head>
-      <body style={{
-        margin: 0,
-        fontFamily: isRTL ? 'Tajawal, sans-serif' : 'Poppins, sans-serif',
-        background: '#f8f7ff',
-        color: '#1a1a2e',
-      }}>
-        <NextIntlClientProvider messages={messages}>
-          <AuthProvider>
-            <CartProvider>
-              <Navbar lang={lang} />
-              {children}
-              <BottomNav lang={lang} />
-            </CartProvider>
-          </AuthProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <div dir={isRTL ? 'rtl' : 'ltr'} style={{
+      fontFamily: isRTL ? 'Tajawal, sans-serif' : 'Poppins, sans-serif',
+      background: '#f8f7ff',
+      color: '#1a1a2e',
+      minHeight: '100vh',
+    }}>
+      <NextIntlClientProvider messages={messages}>
+        <AuthProvider>
+          <CartProvider>
+            <Navbar lang={lang} />
+            {children}
+            <BottomNav lang={lang} />
+          </CartProvider>
+        </AuthProvider>
+      </NextIntlClientProvider>
+    </div>
   );
 }
