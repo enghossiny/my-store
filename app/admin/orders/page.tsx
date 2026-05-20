@@ -141,6 +141,35 @@ export default async function AdminOrdersPage({
                 )}
               </div>
 
+              {/* Payment info */}
+              <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #f3f4f6', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{
+                  padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: '700',
+                  background: order.payment_method === 'cod' ? '#f0fdf4' : order.payment_method === 'instapay' ? '#eff6ff' : '#fdf4ff',
+                  color: order.payment_method === 'cod' ? '#16a34a' : order.payment_method === 'instapay' ? '#3b82f6' : '#9333ea',
+                }}>
+                  {order.payment_method === 'cod' ? '💵 Cash on Delivery'
+                    : order.payment_method === 'instapay' ? `📲 InstaPay`
+                    : '📱 Mobile Wallet'}
+                </span>
+                {order.payment_reference && (
+                  <span style={{ fontSize: '13px', color: '#6b7280' }}>
+                    Ref: <strong>{order.payment_reference}</strong>
+                  </span>
+                )}
+                {order.region_name && (
+                  <span style={{ fontSize: '13px', color: '#6b7280' }}>
+                    🚚 {order.region_name} — ${order.delivery_fee}
+                  </span>
+                )}
+                {order.promo_code && (
+                  <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
+                    🎟️ {order.promo_code} — saved ${order.discount}
+                  </span>
+                )}
+              </div>
+
+
               {/* Items */}
               <div>
                 <p style={{ margin: '0 0 8px', fontSize: '11px', color: '#9ca3af', fontWeight: '600', textTransform: 'uppercase' }}>

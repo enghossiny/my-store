@@ -43,11 +43,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Nav */}
             <nav style={{ flex: 1, padding: '1rem 0' }}>
               {[
-                { href: '/admin', label: 'Overview', icon: '📊' },
-                { href: '/admin/orders', label: 'Orders', icon: '📦' },
-                { href: '/admin/products', label: 'Products', icon: '🛍️' },
-                { href: '/admin/customers', label: 'Customers', icon: '👥' },
-                { href: '/admin/promos', label: 'Promo Codes', icon: '🎟️' },
+                  { href: '/admin', label: 'Overview', icon: '📊' },
+                  { href: '/admin/orders', label: 'Orders', icon: '📦' },
+                  { href: '/admin/products', label: 'Products', icon: '🛍️' },
+                  { href: '/admin/customers', label: 'Customers', icon: '👥' },
+                  { href: '/admin/promos', label: 'Promo Codes', icon: '🎟️' },
+                  { href: '/admin/regions', label: 'Delivery Regions', icon: '🚚' },
               ].map((item) => (
                 <Link key={item.href} href={item.href} style={{
                   display: 'flex', alignItems: 'center', gap: '12px',

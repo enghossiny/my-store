@@ -4,15 +4,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      orderId,
-      customerName,
-      phone,
-      address,
-      total,
-      items,
-      notes,
-      discount,
-      promoCode,
+      orderId, customerName, phone, address, total,
+      items, notes, discount, promoCode,
+      deliveryFee, region, paymentMethod, paymentReference,
     } = body;
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -22,30 +16,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Telegram not configured' }, { status: 500 });
     }
 
-    // Build the message
     const itemsList = items
       .map((item: { name: string; quantity: number; price: number }) =>
-        `  • ${item.name} x${item.quantity} — LE ${(item.price * item.quantity).toFixed(2)}`
-      )
-      .join('\n');
+        `  • ${item.name} ×${item.quantity} — $${(item.price * item.quantity).toFixed(2)}`
+      ).join('\n');
+
+    const paymentLabel =
+      paymentMethod === 'cod' ? '💵 Cash on Delivery'
+      : paymentMethod === 'instapay' ? `📲 InstaPay — Ref: ${paymentReference}`
+      : `📱 Mobile Wallet — From: ${paymentReference}`;
 
     const message = `
-    🛒 *New Order Received!*
+🛒 *New Order Received!*
 
-    📦 *Order ID:* \`${orderId.slice(0, 8)}...\`
-    👤 *Customer:* ${customerName}
-    📞 *Phone:* ${phone}
-    📍 *Address:* ${address}
-    ${notes ? `📝 *Notes:* ${notes}` : ''}
+📦 *Order ID:* \`${orderId.slice(0, 8)}...\`
+👤 *Customer:* ${customerName}
+📞 *Phone:* ${phone}
+📍 *Address:* ${address}
+🚚 *Region:* ${region} — $${deliveryFee}
+${notes ? `📝 *Notes:* ${notes}` : ''}
 
-    🛍️ *Items:*
-    ${itemsList}
+🛍️ *Items:*
+${itemsList}
 
-    ${discount ? `🎟️ *Promo Code:* ${promoCode} (−LE ${discount})` : ''}
-    💰 *Total: LE ${total}*
-    💵 Payment: Cash on Delivery
+💳 *Payment:* ${paymentLabel}
+${discount ? `🎟️ *Promo:* ${promoCode} (−$${discount})` : ''}
+🚚 *Delivery:* $${deliveryFee}
+💰 *Total: $${total}*
 
-    🔗 [View in Admin](${process.env.NEXT_PUBLIC_SITE_URL}/admin/orders)
+🔗 [View in Admin](${process.env.NEXT_PUBLIC_SITE_URL}/admin/orders)
     `.trim();
 
     const response = await fetch(
@@ -62,7 +61,6 @@ export async function POST(req: NextRequest) {
     );
 
     const result = await response.json();
-
     if (!result.ok) {
       return NextResponse.json({ error: result.description }, { status: 500 });
     }
