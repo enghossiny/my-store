@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import LogoutButton from './LogoutButton';
 
+const isAdminConfigured = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+
 export default function AdminLayout({
   children,
 }: {
@@ -115,6 +117,15 @@ export default function AdminLayout({
         </div>
 
         <div style={{ padding: '2rem' }}>
+          {!isAdminConfigured && (
+            <div style={{
+              marginBottom: '1rem', padding: '12px', borderRadius: '10px',
+              background: '#fff7ed', color: '#92400e', border: '1px solid #ffedd5'
+            }}>
+              <strong>Admin configuration missing:</strong> SUPABASE_SERVICE_ROLE_KEY is not set. Admin API features may fail in production. Add the service role key to your host environment (do NOT commit it to git).
+            </div>
+          )}
+
           {children}
         </div>
       </main>
