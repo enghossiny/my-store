@@ -176,24 +176,19 @@ export default function CheckoutPage() {
       if (itemsError) throw itemsError;
 
       // 4. Decrease product stock for ordered items
-      for (const item of items) {
-        const { data: product, error: productError } = await supabase
-          .from('products')
-          .select('stock')
-          .eq('id', item.id)
-          .single();
+      const stockAdjustments = items.map((item) => ({
+        productId: item.id,
+        quantityDelta: -item.quantity,
+      }));
 
-        if (productError || !product) {
-          throw productError || new Error('Product not found');
-        }
+      const stockResponse = await fetch('/api/stock/adjust', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adjustments: stockAdjustments }),
+      });
 
-        const newStock = Math.max(0, (product.stock ?? 0) - item.quantity);
-        const { error: stockError } = await supabase
-          .from('products')
-          .update({ stock: newStock })
-          .eq('id', item.id);
-
-        if (stockError) throw stockError;
+      if (!stockResponse.ok) {
+        throw new Error('Failed to update product stock');
       }
 
       // 5. Increment promo usage

@@ -23,26 +23,6 @@ export default function OrderStatusUpdater({
   const [status, setStatus] = useState(currentStatus);
   const [saving, setSaving] = useState(false);
 
-  const adjustProductStock = async (productId: string, quantityDelta: number) => {
-    const { data: product, error: productError } = await supabase
-      .from('products')
-      .select('stock')
-      .eq('id', productId)
-      .single();
-
-    if (productError || !product) {
-      throw productError || new Error('Product not found');
-    }
-
-    const newStock = Math.max(0, (product.stock ?? 0) + quantityDelta);
-    const { error: stockError } = await supabase
-      .from('products')
-      .update({ stock: newStock })
-      .eq('id', productId);
-
-    if (stockError) throw stockError;
-  };
-
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value;
     setSaving(true);
@@ -62,9 +42,19 @@ export default function OrderStatusUpdater({
       const shouldReserve = status === 'cancelled' && newStatus !== 'cancelled';
 
       if (shouldRestore || shouldReserve) {
-        for (const item of orderItems) {
-          const delta = shouldRestore ? item.quantity : -item.quantity;
-          await adjustProductStock(item.product_id, delta);
+        const stockAdjustments = orderItems.map((item) => ({
+          productId: item.product_id,
+          quantityDelta: shouldRestore ? item.quantity : -item.quantity,
+        }));
+
+        const stockResponse = await fetch('/api/stock/adjust', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adjustments: stockAdjustments }),
+        });
+
+        if (!stockResponse.ok) {
+          throw new Error('Failed to update product stock');
         }
       }
 
