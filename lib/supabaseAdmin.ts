@@ -16,7 +16,7 @@ if (!isSupabaseAdminConfigured) {
     },
   };
 } else {
-  supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+  supabaseAdmin = createClient(supabaseUrl as string, supabaseKey as string);
 }
 
 export { supabaseAdmin, isSupabaseAdminConfigured };
