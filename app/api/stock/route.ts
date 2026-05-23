@@ -34,7 +34,16 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: selectError?.message ?? 'Product not found' }, { status: 400 });
       }
 
-      const updatedStock = Math.max(0, (product.stock ?? 0) + adjustment.quantityDelta);
+      const currentStock = product.stock ?? 0;
+      const updatedStock = currentStock + adjustment.quantityDelta;
+
+      if (updatedStock < 0) {
+        return NextResponse.json(
+          { error: `Insufficient stock for product ${adjustment.productId}` },
+          { status: 400 }
+        );
+      }
+
       const { error: updateError } = await supabaseAdmin
         .from('products')
         .update({ stock: updatedStock })

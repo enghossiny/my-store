@@ -47,7 +47,7 @@ export default function OrderStatusUpdater({
           quantityDelta: shouldRestore ? item.quantity : -item.quantity,
         }));
 
-        const stockResponse = await fetch('/api/stock/adjust', {
+        const stockResponse = await fetch('/api/stock', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ adjustments: stockAdjustments }),

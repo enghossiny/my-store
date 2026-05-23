@@ -126,7 +126,26 @@ export default function CheckoutPage() {
     setError('');
 
     try {
-      // 1. Create or find customer
+      // 1. Validate stock before creating the order
+      const { data: productStocks, error: stockFetchError } = await supabase
+        .from('products')
+        .select('id, stock')
+        .in('id', items.map((item) => item.id));
+
+      if (stockFetchError) throw stockFetchError;
+
+      const unavailableItem = items.find((item) => {
+        const product = productStocks?.find((p) => p.id === item.id);
+        return !product || item.quantity > (product.stock ?? 0);
+      });
+
+      if (unavailableItem) {
+        setError(isAr ? 'الكمية المطلوبة غير متاحة حالياً' : 'Requested quantity is not available');
+        setLoading(false);
+        return;
+      }
+
+      // 2. Create or find customer
       let customerId = null;
       const { data: existingCustomer } = await supabase
         .from('customers').select('id').eq('phone', form.phone).single();
@@ -181,14 +200,19 @@ export default function CheckoutPage() {
         quantityDelta: -item.quantity,
       }));
 
-      const stockResponse = await fetch('/api/stock/adjust', {
+      const stockResponse = await fetch('/api/stock', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ adjustments: stockAdjustments }),
       });
 
       if (!stockResponse.ok) {
-        throw new Error('Failed to update product stock');
+        const stockError = await stockResponse.json().catch(() => null);
+        await supabase.from('order_items').delete().eq('order_id', order.id);
+        await supabase.from('orders').delete().eq('id', order.id);
+        throw new Error(
+          stockError?.error || 'Failed to update product stock'
+        );
       }
 
       // 5. Increment promo usage

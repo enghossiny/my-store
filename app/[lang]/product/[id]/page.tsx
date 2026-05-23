@@ -83,42 +83,16 @@ export default async function ProductPage({
           </p>
 
           {/* Add to cart button */}
-          {product.stock > 0 ? (
-            <button style={{
-              width: '100%',
-              padding: '14px',
-              background: '#111',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '16px',
-              cursor: 'pointer',
-            }}>
-              <AddToCartButton
-                product={{
-                  id: product.id,
-                  name_ar: product.name_ar,
-                  name_en: product.name_en,
-                  price: product.price,
-                }}
-                lang={lang}
-                disabled={product.stock === 0}
-              />
-            </button>
-          ) : (
-            <button disabled style={{
-              width: '100%',
-              padding: '14px',
-              background: '#e5e7eb',
-              color: '#9ca3af',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '16px',
-              cursor: 'not-allowed',
-            }}>
-              {isAr ? 'نفذ المخزون' : 'Out of Stock'}
-            </button>
-          )}
+          <AddToCartButton
+            product={{
+              id: product.id,
+              name_ar: product.name_ar,
+              name_en: product.name_en,
+              price: product.price,
+            }}
+            lang={lang}
+            disabled={product.stock === 0}
+          />
         </div>
       </div>
       </>
