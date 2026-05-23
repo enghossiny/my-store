@@ -47,7 +47,7 @@ export default async function AdminProductsPage() {
               position: 'relative',
             }}>
               {product.images?.[0]
-                ? <img src={product.images[0]} alt={product.name_en} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <img src={product.images[0]} alt={product.name_en} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : <span style={{ fontSize: '48px' }}>🛍️</span>
               }
               <div style={{

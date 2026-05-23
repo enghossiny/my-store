@@ -150,7 +150,7 @@ export default function EditProductModal({
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
                   {images.map((url) => (
                     <div key={url} style={{ position: 'relative' }}>
-                      <img src={url} alt="" style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #c4b5fd' }} />
+                      <img src={url} alt="" loading="lazy" style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #c4b5fd' }} />
                       <button onClick={() => setImages(images.filter(i => i !== url))} style={{
                         position: 'absolute', top: '-6px', right: '-6px',
                         background: '#ef4444', color: '#fff', border: 'none',

@@ -91,6 +91,7 @@ export default function ImageUploader({ onUpload }: Props) {
             <img
               src={preview}
               alt="preview"
+              loading="lazy"
               style={{
                 width: '100%',
                 maxHeight: '200px',

@@ -164,7 +164,7 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
           }}>
             {images.map((url) => (
               <div key={url} style={{ position: 'relative' }}>
-                <img src={url} alt="" style={{
+                <img src={url} alt="" loading="lazy" style={{
                   width: '80px',
                   height: '80px',
                   objectFit: 'cover',

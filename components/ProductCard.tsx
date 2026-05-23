@@ -52,7 +52,7 @@ export default function ProductCard({
           position: 'relative',
         }}>
           {product.images?.[0]
-            ? <img src={product.images[0]} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <img src={product.images[0]} alt={name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : '🛍️'
           }
           {product.stock === 0 && (
