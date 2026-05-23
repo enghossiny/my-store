@@ -23,15 +23,62 @@ export default function OrderStatusUpdater({
   const [status, setStatus] = useState(currentStatus);
   const [saving, setSaving] = useState(false);
 
+  const adjustProductStock = async (productId: string, quantityDelta: number) => {
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select('stock')
+      .eq('id', productId)
+      .single();
+
+    if (productError || !product) {
+      throw productError || new Error('Product not found');
+    }
+
+    const newStock = Math.max(0, (product.stock ?? 0) + quantityDelta);
+    const { error: stockError } = await supabase
+      .from('products')
+      .update({ stock: newStock })
+      .eq('id', productId);
+
+    if (stockError) throw stockError;
+  };
+
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value;
     setSaving(true);
-    await supabase
-      .from('orders')
-      .update({ status: newStatus })
-      .eq('id', orderId);
-    setStatus(newStatus);
-    setSaving(false);
+
+    try {
+      const { data: orderItems, error: itemsError } = await supabase
+        .from('order_items')
+        .select('product_id, quantity')
+        .eq('order_id', orderId);
+
+      if (itemsError || !orderItems) {
+        console.error(itemsError);
+        return;
+      }
+
+      const shouldRestore = status !== 'cancelled' && newStatus === 'cancelled';
+      const shouldReserve = status === 'cancelled' && newStatus !== 'cancelled';
+
+      if (shouldRestore || shouldReserve) {
+        for (const item of orderItems) {
+          const delta = shouldRestore ? item.quantity : -item.quantity;
+          await adjustProductStock(item.product_id, delta);
+        }
+      }
+
+      await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+
+      setStatus(newStatus);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

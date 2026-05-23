@@ -175,12 +175,33 @@ export default function CheckoutPage() {
         })));
       if (itemsError) throw itemsError;
 
-      // 4. Increment promo usage
+      // 4. Decrease product stock for ordered items
+      for (const item of items) {
+        const { data: product, error: productError } = await supabase
+          .from('products')
+          .select('stock')
+          .eq('id', item.id)
+          .single();
+
+        if (productError || !product) {
+          throw productError || new Error('Product not found');
+        }
+
+        const newStock = Math.max(0, (product.stock ?? 0) - item.quantity);
+        const { error: stockError } = await supabase
+          .from('products')
+          .update({ stock: newStock })
+          .eq('id', item.id);
+
+        if (stockError) throw stockError;
+      }
+
+      // 5. Increment promo usage
       if (promo) {
         await supabase.rpc('increment_promo_usage', { promo_code: promo.code });
       }
 
-      // 5. Telegram
+      // 6. Telegram
       try {
         await fetch('/api/notify', {
           method: 'POST',
