@@ -406,13 +406,13 @@ export default function CheckoutPage() {
                       <option value="">{isAr ? 'اختر منطقتك' : 'Select your region'}</option>
                       {regions.map((r) => (
                         <option key={r.id} value={r.id}>
-                          {isAr ? r.name_ar : r.name_en} — ${r.delivery_fee}
+                          {isAr ? r.name_ar : r.name_en} — EGP {r.delivery_fee}
                         </option>
                       ))}
                     </select>
                     {selectedRegion && (
                       <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#6c63ff', fontWeight: '600' }}>
-                        🚚 {isAr ? 'رسوم التوصيل:' : 'Delivery fee:'} ${selectedRegion.delivery_fee}
+                        🚚 {isAr ? 'رسوم التوصيل:' : 'Delivery fee:'} EGP {selectedRegion.delivery_fee}
                       </p>
                     )}
                   </div>
@@ -454,7 +454,7 @@ export default function CheckoutPage() {
                 <p style={{ margin: '0 0 2px', fontSize: '14px', color: '#374151' }}>{form.address}</p>
                 {selectedRegion && (
                   <p style={{ margin: 0, fontSize: '13px', color: '#6c63ff', fontWeight: '600' }}>
-                    🚚 {isAr ? selectedRegion.name_ar : selectedRegion.name_en} — ${selectedRegion.delivery_fee}
+                    🚚 {isAr ? selectedRegion.name_ar : selectedRegion.name_en} — EGP {selectedRegion.delivery_fee}
                   </p>
                 )}
               </div>
@@ -613,11 +613,11 @@ export default function CheckoutPage() {
                       {isAr ? item.name_ar : item.name_en}
                     </p>
                     <p style={{ margin: 0, fontSize: '12px', color: '#9ca3af' }}>
-                      ${item.price} × {item.quantity}
+                      EGP {item.price} × {item.quantity}
                     </p>
                   </div>
                   <p style={{ margin: 0, fontWeight: '700' }}>
-                    ${(item.price * item.quantity).toFixed(2)}
+                    EGP {(item.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
               ))}
@@ -625,7 +625,7 @@ export default function CheckoutPage() {
               <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid #f3f4f6', background: '#fafafa' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <span style={{ fontSize: '14px', color: '#6b7280' }}>{isAr ? 'المجموع الفرعي' : 'Subtotal'}</span>
-                  <span style={{ fontSize: '14px', fontWeight: '600' }}>${total.toFixed(2)}</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600' }}>EGP {total.toFixed(2)}</span>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -634,14 +634,14 @@ export default function CheckoutPage() {
                     {selectedRegion && <span style={{ fontSize: '12px', color: '#9ca3af', marginLeft: '4px' }}>({isAr ? selectedRegion.name_ar : selectedRegion.name_en})</span>}
                   </span>
                   <span style={{ fontSize: '14px', fontWeight: '600', color: selectedRegion ? '#374151' : '#9ca3af' }}>
-                    {selectedRegion ? `$${deliveryFee.toFixed(2)}` : (isAr ? 'اختر المنطقة' : 'Select region')}
+                    {selectedRegion ? `EGP ${deliveryFee.toFixed(2)}` : (isAr ? 'اختر المنطقة' : 'Select region')}
                   </span>
                 </div>
 
                 {discount > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontSize: '14px', color: '#16a34a', fontWeight: '600' }}>🎟️ {promo?.code}</span>
-                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#16a34a' }}>− ${discount.toFixed(2)}</span>
+                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#16a34a' }}>− EGP {discount.toFixed(2)}</span>
                   </div>
                 )}
 
@@ -664,7 +664,7 @@ export default function CheckoutPage() {
                       background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
                       WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                     }}>
-                      ${finalTotal.toFixed(2)}
+                      EGP {finalTotal.toFixed(2)}
                     </span>
                   </div>
                 </div>

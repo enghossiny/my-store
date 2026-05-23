@@ -116,7 +116,7 @@ export default async function AdminOrdersPage({
                   Total
                 </p>
                 <p style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#6c63ff' }}>
-                  ${order.total}
+                  EGP {order.total}
                 </p>
               </div>
               <OrderStatusUpdater orderId={order.id} currentStatus={order.status} />
@@ -159,7 +159,7 @@ export default async function AdminOrdersPage({
                 )}
                 {order.region_name && (
                   <span style={{ fontSize: '13px', color: '#6b7280' }}>
-                    🚚 {order.region_name} — ${order.delivery_fee}
+                    🚚 {order.region_name} — EGP {order.delivery_fee}
                   </span>
                 )}
                 {order.promo_code && (
@@ -184,7 +184,7 @@ export default async function AdminOrdersPage({
                     }}>
                       {item.products?.name_en} ×{item.quantity}
                       <span style={{ color: '#6c63ff', marginLeft: '6px', fontWeight: '700' }}>
-                        ${(item.price * item.quantity).toFixed(2)}
+                        EGP {(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   ))}

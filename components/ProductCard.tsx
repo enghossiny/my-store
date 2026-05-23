@@ -107,7 +107,7 @@ export default function ProductCard({
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}>
-              LE {product.price}
+              EGP {product.price}
             </span>
             <span style={{
               background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',

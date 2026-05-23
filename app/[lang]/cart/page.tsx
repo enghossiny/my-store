@@ -69,7 +69,7 @@ export default function CartPage() {
                   {isAr ? item.name_ar : item.name_en}
                 </p>
                 <p style={{ margin: 0, color: '#6c63ff', fontWeight: '700', fontSize: '16px' }}>
-                  ${item.price}
+                  EGP {item.price}
                 </p>
               </div>
 
@@ -92,7 +92,7 @@ export default function CartPage() {
                   }}>+</button>
                 </div>
                 <p style={{ margin: 0, fontWeight: '800', fontSize: '16px', minWidth: '64px', textAlign: 'right' }}>
-                  ${(item.price * item.quantity).toFixed(2)}
+                  EGP {(item.price * item.quantity).toFixed(2)}
                 </p>
                 <button onClick={() => removeItem(item.id)} style={{
                   background: '#fef2f2', border: '1px solid #fecaca',
@@ -116,7 +116,7 @@ export default function CartPage() {
               {isAr ? 'المجموع' : 'Total'}
             </p>
             <p style={{ margin: 0, fontSize: '28px', fontWeight: '800', color: '#1a1a2e' }}>
-              ${total.toFixed(2)}
+              EGP {total.toFixed(2)}
             </p>
           </div>
           <div className="cart-footer" style={{ display: 'flex', gap: '1rem' }}>

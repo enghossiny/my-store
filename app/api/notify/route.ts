@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     const itemsList = items
       .map((item: { name: string; quantity: number; price: number }) =>
-        `  • ${item.name} ×${item.quantity} — $${(item.price * item.quantity).toFixed(2)}`
+        `  • ${item.name} ×${item.quantity} — EGP ${(item.price * item.quantity).toFixed(2)}`
       ).join('\n');
 
     const paymentLabel =
@@ -33,16 +33,16 @@ export async function POST(req: NextRequest) {
 👤 *Customer:* ${customerName}
 📞 *Phone:* ${phone}
 📍 *Address:* ${address}
-🚚 *Region:* ${region} — $${deliveryFee}
+🚚 *Region:* ${region} — EGP ${deliveryFee}
 ${notes ? `📝 *Notes:* ${notes}` : ''}
 
 🛍️ *Items:*
 ${itemsList}
 
 💳 *Payment:* ${paymentLabel}
-${discount ? `🎟️ *Promo:* ${promoCode} (−$${discount})` : ''}
-🚚 *Delivery:* $${deliveryFee}
-💰 *Total: $${total}*
+${discount ? `🎟️ *Promo:* ${promoCode} (−EGP ${discount})` : ''}
+🚚 *Delivery:* EGP ${deliveryFee}
+💰 *Total: EGP ${total}*
 
 🔗 [View in Admin](${process.env.NEXT_PUBLIC_SITE_URL}/admin/orders)
     `.trim();

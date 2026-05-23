@@ -86,11 +86,11 @@ export default async function AdminPromosPage() {
                   background: promo.discount_type === 'percentage' ? '#f0fdf4' : '#eff6ff',
                   color: promo.discount_type === 'percentage' ? '#16a34a' : '#3b82f6',
                 }}>
-                  {promo.discount_type === 'percentage' ? `${promo.discount_value}% off` : `$${promo.discount_value} off`}
+                  {promo.discount_type === 'percentage' ? `${promo.discount_value}% off` : `EGP ${promo.discount_value} off`}
                 </span>
                 {promo.min_order_amount > 0 && (
                   <span style={{ padding: '3px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '600', background: '#f3f4f6', color: '#6b7280' }}>
-                    Min: ${promo.min_order_amount}
+                    Min: EGP {promo.min_order_amount}
                   </span>
                 )}
                 <span style={{ padding: '3px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '600', background: '#f3f4f6', color: '#6b7280' }}>

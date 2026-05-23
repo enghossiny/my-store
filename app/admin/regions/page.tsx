@@ -72,7 +72,7 @@ export default async function AdminRegionsPage() {
                     background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
                     WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                   }}>
-                    ${region.delivery_fee}
+                    EGP {region.delivery_fee}
                   </span>
                 </td>
                 <td style={{ padding: '14px 16px' }}>

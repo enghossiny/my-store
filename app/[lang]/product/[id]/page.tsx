@@ -71,7 +71,7 @@ export default async function ProductPage({
           <h1 style={{ fontSize: '28px', margin: '0 0 1rem' }}>{name}</h1>
 
           <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#16a34a', margin: '0 0 1rem' }}>
-            LE {product.price}
+            EGP {product.price}
           </p>
 
           <p style={{ color: '#374151', lineHeight: '1.7', margin: '0 0 1.5rem' }}>

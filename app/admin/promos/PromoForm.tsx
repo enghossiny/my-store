@@ -91,7 +91,7 @@ export default function PromoForm() {
           </label>
           <select name="discount_type" value={form.discount_type} onChange={handleChange} style={inputStyle}>
             <option value="percentage">Percentage (%)</option>
-            <option value="fixed">Fixed Amount ($)</option>
+            <option value="fixed">Fixed Amount (EGP)</option>
           </select>
         </div>
         <div>
@@ -104,7 +104,7 @@ export default function PromoForm() {
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
-            Min Order Amount ($)
+            Min Order Amount (EGP)
           </label>
           <input name="min_order_amount" value={form.min_order_amount} onChange={handleChange}
             type="number" placeholder="0" style={inputStyle} />

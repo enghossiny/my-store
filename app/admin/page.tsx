@@ -33,7 +33,7 @@ export default async function AdminPage() {
   };
 
   const stats = [
-    { label: 'Total Revenue', value: `$${totalRevenue.toFixed(2)}`, icon: '💰', color: '#6c63ff', sub: `$${deliveredRevenue.toFixed(2)} delivered` },
+    { label: 'Total Revenue', value: `EGP ${totalRevenue.toFixed(2)}`, icon: '💰', color: '#6c63ff', sub: `EGP ${deliveredRevenue.toFixed(2)} delivered` },
     { label: 'Total Orders', value: totalOrders ?? 0, icon: '📦', color: '#e91e8c', sub: `${pendingOrders} pending` },
     { label: 'Products', value: totalProducts ?? 0, icon: '🛍️', color: '#00c9a7', sub: 'in store' },
     { label: 'Customers', value: totalCustomers ?? 0, icon: '👥', color: '#f59e0b', sub: `${cancelledOrders} cancelled orders` },
@@ -102,7 +102,7 @@ export default async function AdminPage() {
                     {s.status}
                   </span>
                   <span style={{ fontSize: '13px', color: '#6b7280' }}>
-                    {s.count} orders — ${s.revenue.toFixed(2)}
+                    {s.count} orders — EGP {s.revenue.toFixed(2)}
                   </span>
                 </div>
                 <div style={{ background: '#f3f4f6', borderRadius: '999px', height: '6px' }}>
@@ -129,10 +129,10 @@ export default async function AdminPage() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
-              { label: 'Total Revenue (all orders)', value: `$${totalRevenue.toFixed(2)}` },
-              { label: 'Confirmed Revenue', value: `$${allOrders?.filter(o => ['confirmed', 'shipped', 'delivered'].includes(o.status)).reduce((s, o) => s + Number(o.total), 0).toFixed(2)}` },
-              { label: 'Delivered Revenue', value: `$${deliveredRevenue.toFixed(2)}` },
-              { label: 'Average Order Value', value: `$${totalOrders ? (totalRevenue / totalOrders).toFixed(2) : '0.00'}` },
+              { label: 'Total Revenue (all orders)', value: `EGP ${totalRevenue.toFixed(2)}` },
+              { label: 'Confirmed Revenue', value: `EGP ${allOrders?.filter(o => ['confirmed', 'shipped', 'delivered'].includes(o.status)).reduce((s, o) => s + Number(o.total), 0).toFixed(2)}` },
+              { label: 'Delivered Revenue', value: `EGP ${deliveredRevenue.toFixed(2)}` },
+              { label: 'Average Order Value', value: `EGP ${totalOrders ? (totalRevenue / totalOrders).toFixed(2) : '0.00'}` },
             ].map((item) => (
               <div key={item.label} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -181,7 +181,7 @@ export default async function AdminPage() {
                     {order.address}
                   </span>
                 </td>
-                <td style={{ padding: '12px 16px', fontWeight: '700', color: '#1a1a2e' }}>${order.total}</td>
+                <td style={{ padding: '12px 16px', fontWeight: '700', color: '#1a1a2e' }}>EGP {order.total}</td>
                 <td style={{ padding: '12px 16px' }}>
                   <span style={{
                     padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: '600',

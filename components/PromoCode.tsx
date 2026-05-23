@@ -113,9 +113,9 @@ export default function PromoCode({ lang, orderTotal, onApply }: Props) {
             <p style={{ margin: 0, fontSize: '12px', color: '#16a34a' }}>
               {applied.discount_type === 'percentage'
                 ? `${applied.discount_value}% ${isAr ? 'خصم' : 'off'}`
-                : `LE ${applied.discount_value} ${isAr ? 'خصم' : 'off'}`}
+                : `EGP ${applied.discount_value} ${isAr ? 'خصم' : 'off'}`}
               {' — '}
-              {isAr ? 'وفرت' : 'You save'} LE {applied.discountAmount}
+              {isAr ? 'وفرت' : 'You save'} EGP {applied.discountAmount}
             </p>
           </div>
         </div>

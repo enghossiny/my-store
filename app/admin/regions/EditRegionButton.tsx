@@ -89,7 +89,7 @@ export default function EditRegionButton({ region }: { region: Region }) {
                 <input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} style={inputStyle} dir="rtl" />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>DELIVERY FEE ($)</label>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>DELIVERY FEE (EGP)</label>
                 <input type="number" value={form.delivery_fee} onChange={(e) => setForm({ ...form, delivery_fee: e.target.value })} style={inputStyle} />
               </div>
             </div>

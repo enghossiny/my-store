@@ -74,7 +74,7 @@ export default async function AdminProductsPage() {
                   background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
                   WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                 }}>
-                  ${product.price}
+                  EGP {product.price}
                 </span>
                 <span style={{ fontSize: '12px', color: '#9ca3af', background: '#f3f4f6', padding: '3px 10px', borderRadius: '999px' }}>
                   {product.categories?.name_en ?? 'No category'}
