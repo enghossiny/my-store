@@ -17,20 +17,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    let isMounted = true;
 
-    // Listen for auth changes
+    const initializeAuth = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+
+      if (error?.message?.includes('Refresh Token')) {
+        await supabase.auth.signOut();
+        if (isMounted) setUser(null);
+      } else if (isMounted) {
+        setUser(session?.user ?? null);
+      }
+
+      if (isMounted) setLoading(false);
+    };
+
+    initializeAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        if (event === 'TOKEN_REFRESH_FAILED' || event === 'SIGNED_OUT') {
+          setUser(null);
+          return;
+        }
         setUser(session?.user ?? null);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
