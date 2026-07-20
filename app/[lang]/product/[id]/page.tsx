@@ -56,8 +56,18 @@ export default async function ProductPage({
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: '80px',
+          overflow: 'hidden',
         }}>
-          🛍️
+          {product.images && product.images[0] ? (
+            <img
+              src={product.images[0]}
+              alt={name}
+              loading="lazy"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            '🛍️'
+          )}
         </div>
 
         {/* Product details */}
