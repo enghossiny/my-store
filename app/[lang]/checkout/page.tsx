@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cartContext';
 import { useAuth } from '@/lib/authContext';
-import { supabase } from '@/lib/supabase';
+import { getCurrentUser, supabase } from '@/lib/supabase';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PromoCode from '@/components/PromoCode';
@@ -710,7 +710,7 @@ function SaveNewAddressInline({
   const handleSave = async () => {
     if (!form.name || !form.phone || !form.address || !regionId) return;
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) { setSaving(false); return; }
 
     await supabase.from('customer_addresses').insert({

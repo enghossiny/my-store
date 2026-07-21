@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from './supabase';
+import { clearAuthSession, supabase } from './supabase';
 import type { User } from '@supabase/supabase-js';
 
 type AuthContextType = {
@@ -20,13 +20,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     const initializeAuth = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-      if (error?.message?.includes('Refresh Token')) {
-        await supabase.auth.signOut();
+        if (error && /refresh token|invalid refresh token/i.test(error.message)) {
+          await clearAuthSession();
+          if (isMounted) setUser(null);
+        } else if (isMounted) {
+          setUser(session?.user ?? null);
+        }
+      } catch {
+        await clearAuthSession();
         if (isMounted) setUser(null);
-      } else if (isMounted) {
-        setUser(session?.user ?? null);
       }
 
       if (isMounted) setLoading(false);

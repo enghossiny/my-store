@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getCurrentUser, supabase } from '@/lib/supabase';
 
 type Address = {
   id: string;
@@ -49,7 +49,7 @@ export default function SavedAddresses({ lang, onSelect, selectedId }: Props) {
 
   const loadAddresses = async () => {
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) { setLoading(false); return; }
 
     const { data } = await supabase
@@ -81,7 +81,7 @@ export default function SavedAddresses({ lang, onSelect, selectedId }: Props) {
     if (!newAddr.name || !newAddr.phone || !newAddr.address || !newAddr.region_id) return;
 
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) { setSaving(false); return; }
 
     const region = regions.find(r => r.id === newAddr.region_id);
@@ -113,7 +113,7 @@ export default function SavedAddresses({ lang, onSelect, selectedId }: Props) {
   };
 
   const handleSetDefault = async (id: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     if (!user) return;
 
     // Remove default from all
