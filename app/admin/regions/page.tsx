@@ -1,8 +1,11 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
 import RegionForm from './RegionForm';
 import DeleteRegionButton from './DeleteRegionButton';
 import ToggleRegionButton from './ToggleRegionButton';
 import EditRegionButton from './EditRegionButton';
+
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 export default async function AdminRegionsPage() {
   const { data: regions } = await supabase

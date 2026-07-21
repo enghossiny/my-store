@@ -59,8 +59,8 @@ export default function PromoCode({ lang, orderTotal, onApply }: Props) {
     if (orderTotal < data.min_order_amount) {
       setError(
         isAr
-          ? `الحد الأدنى للطلب LE ${data.min_order_amount}`
-          : `Minimum order amount is LE ${data.min_order_amount}`
+          ? `الحد الأدنى للطلب EGP ${data.min_order_amount}`
+          : `Minimum order amount is EGP ${data.min_order_amount}`
       );
       setLoading(false);
       return;

@@ -106,7 +106,7 @@ export default async function ProductPage({
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}>
-                ${product.price}
+                EGP {product.price}
               </span>
             </div>
 
@@ -238,7 +238,7 @@ export default async function ProductPage({
                         background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
                         WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                       }}>
-                        ${p.price}
+                        EGP {p.price}
                       </p>
                     </div>
                   </div>

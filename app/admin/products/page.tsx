@@ -1,7 +1,10 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
 import ProductForm from './ProductForm';
 import DeleteProductButton from './DeleteProductButton';
 import EditProductModal from './EditProductModal';
+
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 export default async function AdminProductsPage() {
   const { data: products } = await supabase

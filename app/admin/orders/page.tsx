@@ -1,5 +1,8 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
 import OrderStatusUpdater from './OrderStatusUpdater';
+
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 export default async function AdminOrdersPage({
   searchParams,
@@ -146,7 +149,7 @@ export default async function AdminOrdersPage({
                   Total
                 </p>
                 <p style={{ margin: 0, fontSize: '20px', fontWeight: '800', color: '#6c63ff' }}>
-                  ${order.total}
+                  EGP {Number(order.total).toFixed(2)}
                 </p>
               </div>
               <OrderStatusUpdater
@@ -193,7 +196,7 @@ export default async function AdminOrdersPage({
                     }}>
                       {item.products?.name_en} ×{item.quantity}
                       <span style={{ color: '#6c63ff', marginLeft: '6px', fontWeight: '700' }}>
-                        ${(item.price * item.quantity).toFixed(2)}
+                        EGP {(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -233,14 +236,14 @@ export default async function AdminOrdersPage({
                 {order.region_name && (
                   <span style={{ fontSize: '13px', color: '#6b7280' }}>
                     🚚 {order.region_name}
-                    {order.delivery_fee > 0 && ` — $${order.delivery_fee}`}
+                    {order.delivery_fee > 0 && ` — EGP ${Number(order.delivery_fee).toFixed(2)}`}
                   </span>
                 )}
 
                 {/* Promo */}
                 {order.promo_code && (
                   <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
-                    🎟️ {order.promo_code} — saved ${order.discount}
+                    🎟️ {order.promo_code} — saved EGP {Number(order.discount).toFixed(2)}
                   </span>
                 )}
 

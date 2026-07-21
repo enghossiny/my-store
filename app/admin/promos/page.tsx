@@ -1,7 +1,10 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
 import PromoForm from './PromoForm';
 import DeletePromoButton from './DeletePromoButton';
 import TogglePromoButton from './TogglePromoButton';
+
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 export default async function AdminPromosPage() {
   const { data: promos } = await supabase

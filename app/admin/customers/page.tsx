@@ -1,4 +1,7 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
+
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 export default async function AdminCustomersPage() {
   const { data: customers } = await supabase
