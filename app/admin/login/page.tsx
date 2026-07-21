@@ -177,7 +177,7 @@ export default function AdminLoginPage() {
 
         {/* Footer */}
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '13px', marginTop: '1.5rem' }}>
-          MyStore Admin Panel
+          MALATH Admin Panel
         </p>
       </div>
     </div>

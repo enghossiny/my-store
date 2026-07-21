@@ -39,7 +39,7 @@ export default function Navbar({ lang }: { lang: string }) {
             justifyContent: 'center', fontSize: '18px',
           }}>🛒</div>
           <span style={{ color: '#fff', fontWeight: '800', fontSize: '18px' }}>
-            {isAr ? 'متجري' : 'MyStore'}
+            {isAr ? 'ملاذ' : 'MALATH'}
           </span>
         </Link>
 

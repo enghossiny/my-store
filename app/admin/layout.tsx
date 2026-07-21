@@ -39,7 +39,7 @@ export default function AdminLayout({
             }}>🛒</div>
             <div>
               <p style={{ margin: 0, fontWeight: '800', fontSize: '16px', color: '#fff' }}>
-                MyStore
+                MALATH
               </p>
               <p style={{ margin: 0, fontSize: '11px', color: '#6c63ff' }}>
                 Admin Panel
