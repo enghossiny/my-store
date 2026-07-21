@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 
@@ -11,8 +12,7 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
   const [form, setForm] = useState({
     name_en: '', name_ar: '',
     description_en: '', description_ar: '',
-    price: '', stock: '',
-    category_id: '',
+    price: '', stock: '', category_id: '',
   });
   const [images, setImages] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -25,14 +25,6 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleImageUpload = (url: string) => {
-    setImages((prev) => [...prev, url]);
-  };
-
-  const removeImage = (url: string) => {
-    setImages((prev) => prev.filter((i) => i !== url));
-  };
-
   const handleSubmit = async () => {
     if (!form.name_en || !form.name_ar || !form.price) {
       setError('Please fill in name (EN), name (AR) and price');
@@ -41,25 +33,19 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
     setSaving(true);
     setError('');
 
-    const response = await fetch('/api/admin/products', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name_en: form.name_en,
-        name_ar: form.name_ar,
-        description_en: form.description_en,
-        description_ar: form.description_ar,
-        price: form.price,
-        stock: form.stock,
-        category_id: form.category_id || null,
-        images,
-      }),
+    const { error: insertError } = await supabase.from('products').insert({
+      name_en: form.name_en,
+      name_ar: form.name_ar,
+      description_en: form.description_en,
+      description_ar: form.description_ar,
+      price: parseFloat(form.price),
+      stock: parseInt(form.stock) || 0,
+      category_id: form.category_id || null,
+      images,
     });
-    const result = await response.json();
 
-    if (!response.ok || result.error) {
-      setError(result.error || 'Failed to save product');
+    if (insertError) {
+      setError('Failed to save product: ' + insertError.message);
       setSaving(false);
       return;
     }
@@ -77,70 +63,43 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
   };
 
   const inputStyle = {
-    width: '100%',
-    padding: '10px 12px',
-    border: '1.5px solid #e5e7eb',
-    borderRadius: '10px',
-    fontSize: '14px',
-    boxSizing: 'border-box' as const,
-    outline: 'none',
-    fontFamily: 'inherit',
+    width: '100%', padding: '10px 12px',
+    border: '1.5px solid #e5e7eb', borderRadius: '10px',
+    fontSize: '14px', boxSizing: 'border-box' as const,
+    fontFamily: 'inherit', outline: 'none',
   };
 
   return (
     <div>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '1rem',
-        marginBottom: '1rem',
-      }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
-            Name (English) *
-          </label>
-          <input name="name_en" value={form.name_en} onChange={handleChange} style={inputStyle} />
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>NAME (EN) *</label>
+          <input name="name_en" value={form.name_en} onChange={handleChange} placeholder="Product name" style={inputStyle} />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
-            Name (Arabic) *
-          </label>
-          <input name="name_ar" value={form.name_ar} onChange={handleChange} style={inputStyle} dir="rtl" />
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>NAME (AR) *</label>
+          <input name="name_ar" value={form.name_ar} onChange={handleChange} placeholder="اسم المنتج" style={inputStyle} dir="rtl" />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
-            Description (English)
-          </label>
-          <textarea name="description_en" value={form.description_en} onChange={handleChange}
-            rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>DESCRIPTION (EN)</label>
+          <textarea name="description_en" value={form.description_en} onChange={handleChange} rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
-            Description (Arabic)
-          </label>
-          <textarea name="description_ar" value={form.description_ar} onChange={handleChange}
-            rows={3} style={{ ...inputStyle, resize: 'vertical' }} dir="rtl" />
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>DESCRIPTION (AR)</label>
+          <textarea name="description_ar" value={form.description_ar} onChange={handleChange} rows={3} style={{ ...inputStyle, resize: 'vertical' }} dir="rtl" />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
-            Price *
-          </label>
-          <input name="price" value={form.price} onChange={handleChange}
-            type="number" placeholder="0.00" style={inputStyle} />
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>PRICE *</label>
+          <input name="price" value={form.price} onChange={handleChange} type="number" placeholder="0.00" style={inputStyle} />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
-            Stock
-          </label>
-          <input name="stock" value={form.stock} onChange={handleChange}
-            type="number" placeholder="0" style={inputStyle} />
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>STOCK</label>
+          <input name="stock" value={form.stock} onChange={handleChange} type="number" placeholder="0" style={inputStyle} />
         </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
-            Category
-          </label>
+        <div style={{ gridColumn: 'span 2' }}>
+          <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>CATEGORY</label>
           <select name="category_id" value={form.category_id} onChange={handleChange} style={inputStyle}>
-            <option value="">Select category</option>
+            <option value="">No category</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.name_en}</option>
             ))}
@@ -148,46 +107,45 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
         </div>
       </div>
 
-      {/* Image upload */}
+      {/* Images section */}
       <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>
-          Product Images
+        <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
+          PRODUCT IMAGES ({images.length} uploaded)
         </label>
 
-        {/* Uploaded images preview */}
+        {/* Uploaded images */}
         {images.length > 0 && (
           <div style={{
-            display: 'flex',
-            gap: '8px',
-            flexWrap: 'wrap',
-            marginBottom: '12px',
+            display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px',
+            padding: '12px', background: '#f9fafb', borderRadius: '12px',
+            border: '1px solid #f3f4f6',
           }}>
-            {images.map((url) => (
+            {images.map((url, i) => (
               <div key={url} style={{ position: 'relative' }}>
-                <img src={url} alt="" loading="lazy" style={{
-                  width: '80px',
-                  height: '80px',
-                  objectFit: 'cover',
-                  borderRadius: '10px',
-                  border: '2px solid #c4b5fd',
+                <img src={url} alt={`Image ${i + 1}`} style={{
+                  width: '80px', height: '80px', objectFit: 'cover',
+                  borderRadius: '10px', border: i === 0 ? '3px solid #6c63ff' : '2px solid #e5e7eb',
                 }} />
+                {i === 0 && (
+                  <span style={{
+                    position: 'absolute', bottom: '-6px', left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: '#6c63ff', color: '#fff',
+                    fontSize: '9px', fontWeight: '700',
+                    padding: '1px 6px', borderRadius: '999px', whiteSpace: 'nowrap',
+                  }}>
+                    MAIN
+                  </span>
+                )}
                 <button
-                  onClick={() => removeImage(url)}
+                  onClick={() => setImages(images.filter((_, idx) => idx !== i))}
                   style={{
-                    position: 'absolute',
-                    top: '-8px',
-                    right: '-8px',
-                    background: '#ef4444',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '999px',
-                    width: '20px',
-                    height: '20px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    position: 'absolute', top: '-8px', right: '-8px',
+                    background: '#ef4444', color: '#fff', border: 'none',
+                    borderRadius: '999px', width: '22px', height: '22px',
+                    cursor: 'pointer', fontSize: '12px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: '700',
                   }}
                 >✕</button>
               </div>
@@ -195,15 +153,20 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
           </div>
         )}
 
-        <ImageUploader onUpload={handleImageUpload} />
+        <ImageUploader onUpload={(url) => setImages(prev => [...prev, url])} />
+
+        {images.length > 1 && (
+          <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#9ca3af' }}>
+            💡 First image is the main display image. Drag to reorder (coming soon).
+          </p>
+        )}
       </div>
 
       {error && (
         <p style={{ color: '#ef4444', background: '#fef2f2', padding: '10px 14px', borderRadius: '8px', marginBottom: '1rem', fontSize: '14px' }}>
-          {error}
+          ❌ {error}
         </p>
       )}
-
       {success && (
         <p style={{ color: '#16a34a', background: '#f0fdf4', padding: '10px 14px', borderRadius: '8px', marginBottom: '1rem', fontSize: '14px' }}>
           ✅ Product added successfully!
@@ -216,12 +179,9 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
         style={{
           padding: '12px 32px',
           background: saving ? '#9ca3af' : 'linear-gradient(135deg, #6c63ff, #e91e8c)',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '999px',
+          color: '#fff', border: 'none', borderRadius: '999px',
           cursor: saving ? 'not-allowed' : 'pointer',
-          fontSize: '15px',
-          fontWeight: '700',
+          fontSize: '15px', fontWeight: '700', fontFamily: 'inherit',
           boxShadow: saving ? 'none' : '0 4px 15px rgba(108,99,255,0.4)',
         }}
       >
