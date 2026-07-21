@@ -31,7 +31,9 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (selectError || !product) {
-        return NextResponse.json({ error: selectError?.message ?? 'Product not found' }, { status: 400 });
+        const message = selectError?.message || 'Product not found';
+        console.error('Stock select error:', message, adjustment);
+        return NextResponse.json({ error: message }, { status: 400 });
       }
 
       const currentStock = product.stock ?? 0;
@@ -50,6 +52,7 @@ export async function POST(req: NextRequest) {
         .eq('id', adjustment.productId);
 
       if (updateError) {
+        console.error('Stock update error:', updateError.message, adjustment);
         return NextResponse.json({ error: updateError.message }, { status: 400 });
       }
 
@@ -59,6 +62,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, results });
   } catch (error) {
     console.error('Stock adjust error:', error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Server error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 
@@ -20,10 +21,12 @@ export default function EditProductModal({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    name_en: product.name_en, name_ar: product.name_ar,
+    name_en: product.name_en ?? '',
+    name_ar: product.name_ar ?? '',
     description_en: product.description_en ?? '',
     description_ar: product.description_ar ?? '',
-    price: String(product.price), stock: String(product.stock),
+    price: String(product.price ?? ''),
+    stock: String(product.stock ?? 0),
     category_id: product.category_id ?? '',
   });
   const [images, setImages] = useState<string[]>(product.images ?? []);
@@ -31,33 +34,39 @@ export default function EditProductModal({
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSave = async () => {
+    if (!form.name_en || !form.name_ar || !form.price) {
+      setError('Name (EN), Name (AR) and Price are required');
+      return;
+    }
+
     setSaving(true);
     setError('');
 
-    const response = await fetch(`/api/admin/products/${product.id}`, {
-      method: 'PUT',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name_en: form.name_en,
-        name_ar: form.name_ar,
-        description_en: form.description_en,
-        description_ar: form.description_ar,
-        price: form.price,
-        stock: form.stock,
-        category_id: form.category_id || null,
-        images,
-      }),
-    });
-    const result = await response.json();
+    const updateData = {
+      name_en: form.name_en.trim(),
+      name_ar: form.name_ar.trim(),
+      description_en: form.description_en.trim(),
+      description_ar: form.description_ar.trim(),
+      price: parseFloat(form.price),
+      stock: parseInt(form.stock) || 0,
+      category_id: form.category_id || null,
+      images,
+    };
 
-    if (!response.ok || result.error) {
-      setError(result.error || 'Failed to save product');
+    const { error: updateError } = await supabase
+      .from('products')
+      .update(updateData)
+      .eq('id', product.id);
+
+    if (updateError) {
+      setError('Failed to save: ' + updateError.message);
       setSaving(false);
       return;
     }
@@ -65,7 +74,10 @@ export default function EditProductModal({
     setSuccess(true);
     setSaving(false);
     router.refresh();
-    setTimeout(() => { setSuccess(false); setOpen(false); }, 1000);
+    setTimeout(() => {
+      setSuccess(false);
+      setOpen(false);
+    }, 1200);
   };
 
   const inputStyle = {
@@ -77,7 +89,7 @@ export default function EditProductModal({
 
   return (
     <>
-      <button onClick={() => setOpen(true)} style={{
+      <button onClick={() => { setOpen(true); setError(''); setSuccess(false); }} style={{
         flex: 1, padding: '8px',
         background: '#f8f7ff', color: '#6c63ff',
         border: '1px solid #c4b5fd', borderRadius: '8px',
@@ -88,30 +100,35 @@ export default function EditProductModal({
 
       {open && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.6)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 1000, padding: '1rem',
         }}>
           <div style={{
             background: '#fff', borderRadius: '20px', padding: '2rem',
-            width: '100%', maxWidth: '640px', maxHeight: '90vh',
-            overflow: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            width: '100%', maxWidth: '680px',
+            maxHeight: '90vh', overflow: 'auto',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.4)',
           }}>
+            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '800' }}>Edit Product</h2>
               <button onClick={() => setOpen(false)} style={{
                 background: '#f3f4f6', border: 'none', borderRadius: '999px',
                 width: '32px', height: '32px', cursor: 'pointer', fontSize: '16px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>✕</button>
             </div>
 
+            {/* Fields */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>NAME (EN)</label>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>NAME (EN) *</label>
                 <input name="name_en" value={form.name_en} onChange={handleChange} style={inputStyle} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>NAME (AR)</label>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>NAME (AR) *</label>
                 <input name="name_ar" value={form.name_ar} onChange={handleChange} style={inputStyle} dir="rtl" />
               </div>
               <div>
@@ -123,7 +140,7 @@ export default function EditProductModal({
                 <textarea name="description_ar" value={form.description_ar} onChange={handleChange} rows={3} style={{ ...inputStyle, resize: 'vertical' }} dir="rtl" />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>PRICE</label>
+                <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>PRICE *</label>
                 <input name="price" value={form.price} onChange={handleChange} type="number" style={inputStyle} />
               </div>
               <div>
@@ -144,43 +161,87 @@ export default function EditProductModal({
             {/* Images */}
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
-                IMAGES
+                IMAGES ({images.length} total)
               </label>
+
               {images.length > 0 && (
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                  {images.map((url) => (
-                    <div key={url} style={{ position: 'relative' }}>
-                      <img src={url} alt="" loading="lazy" style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #c4b5fd' }} />
-                      <button onClick={() => setImages(images.filter(i => i !== url))} style={{
-                        position: 'absolute', top: '-6px', right: '-6px',
-                        background: '#ef4444', color: '#fff', border: 'none',
-                        borderRadius: '999px', width: '18px', height: '18px',
-                        cursor: 'pointer', fontSize: '10px',
-                      }}>✕</button>
+                <div style={{
+                  display: 'flex', gap: '8px', flexWrap: 'wrap',
+                  marginBottom: '12px', padding: '12px',
+                  background: '#f9fafb', borderRadius: '12px',
+                  border: '1px solid #f3f4f6',
+                }}>
+                  {images.map((url, i) => (
+                    <div key={`${url}-${i}`} style={{ position: 'relative' }}>
+                      <img src={url} alt="" style={{
+                        width: '80px', height: '80px', objectFit: 'cover',
+                        borderRadius: '10px',
+                        border: i === 0 ? '3px solid #6c63ff' : '2px solid #e5e7eb',
+                      }} />
+                      {i === 0 && (
+                        <span style={{
+                          position: 'absolute', bottom: '-6px', left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: '#6c63ff', color: '#fff',
+                          fontSize: '9px', fontWeight: '700',
+                          padding: '1px 6px', borderRadius: '999px', whiteSpace: 'nowrap',
+                        }}>MAIN</span>
+                      )}
+                      <button
+                        onClick={() => setImages(images.filter((_, idx) => idx !== i))}
+                        style={{
+                          position: 'absolute', top: '-8px', right: '-8px',
+                          background: '#ef4444', color: '#fff', border: 'none',
+                          borderRadius: '999px', width: '22px', height: '22px',
+                          cursor: 'pointer', fontSize: '12px', fontWeight: '700',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                      >✕</button>
                     </div>
                   ))}
                 </div>
               )}
-              <ImageUploader onUpload={(url) => setImages([...images, url])} />
+
+              <ImageUploader onUpload={(url) => setImages(prev => [...prev, url])} />
             </div>
 
+            {/* Error / Success */}
             {error && (
-              <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '1rem' }}>
+              <div style={{
+                padding: '10px 14px', background: '#fef2f2',
+                border: '1px solid #fecaca', borderRadius: '8px',
+                marginBottom: '1rem', color: '#ef4444', fontSize: '14px',
+              }}>
                 ❌ {error}
-              </p>
+              </div>
             )}
+            {success && (
+              <div style={{
+                padding: '10px 14px', background: '#f0fdf4',
+                border: '1px solid #bbf7d0', borderRadius: '8px',
+                marginBottom: '1rem', color: '#16a34a', fontSize: '14px', fontWeight: '600',
+              }}>
+                ✅ Product saved successfully!
+              </div>
+            )}
+
+            {/* Actions */}
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={handleSave} disabled={saving} style={{
-                flex: 1, padding: '12px',
-                background: success ? '#16a34a' : saving ? '#9ca3af' : 'linear-gradient(135deg, #6c63ff, #e91e8c)',
+                flex: 1, padding: '13px',
+                background: success
+                  ? '#16a34a'
+                  : saving ? '#9ca3af'
+                  : 'linear-gradient(135deg, #6c63ff, #e91e8c)',
                 color: '#fff', border: 'none', borderRadius: '999px',
                 cursor: saving ? 'not-allowed' : 'pointer',
                 fontSize: '15px', fontWeight: '800', fontFamily: 'inherit',
+                boxShadow: saving || success ? 'none' : '0 4px 15px rgba(108,99,255,0.4)',
               }}>
                 {success ? '✅ Saved!' : saving ? 'Saving...' : 'Save Changes'}
               </button>
               <button onClick={() => setOpen(false)} style={{
-                padding: '12px 24px', background: '#f3f4f6',
+                padding: '13px 24px', background: '#f3f4f6',
                 color: '#374151', border: 'none', borderRadius: '999px',
                 cursor: 'pointer', fontSize: '15px', fontWeight: '600', fontFamily: 'inherit',
               }}>

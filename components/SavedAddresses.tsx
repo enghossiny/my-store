@@ -211,7 +211,7 @@ export default function SavedAddresses({ lang, onSelect, selectedId }: Props) {
                   </p>
                   {addr.region_name_en && (
                     <p style={{ margin: 0, fontSize: '13px', color: '#6c63ff', fontWeight: '600' }}>
-                      🚚 {isAr ? addr.region_name_ar : addr.region_name_en} — ${addr.delivery_fee}
+                      🚚 {isAr ? addr.region_name_ar : addr.region_name_en} — EGP {addr.delivery_fee}
                     </p>
                   )}
                 </div>
@@ -348,7 +348,7 @@ export default function SavedAddresses({ lang, onSelect, selectedId }: Props) {
                 <option value="">{isAr ? 'اختر المنطقة' : 'Select region'}</option>
                 {regions.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {isAr ? r.name_ar : r.name_en} — ${r.delivery_fee}
+                    {isAr ? r.name_ar : r.name_en} — EGP {r.delivery_fee}
                   </option>
                 ))}
               </select>

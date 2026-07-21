@@ -57,6 +57,7 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
 
+  const apiBaseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const instapayAccount = process.env.NEXT_PUBLIC_INSTAPAY_ACCOUNT ?? '';
   const walletNumber = process.env.NEXT_PUBLIC_WALLET_NUMBER ?? '';
 
@@ -200,19 +201,31 @@ export default function CheckoutPage() {
         quantityDelta: -item.quantity,
       }));
 
-      const stockResponse = await fetch('/api/stock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adjustments: stockAdjustments }),
-      });
+      const rollbackOrder = async (orderId: string) => {
+        await supabase.from('order_items').delete().eq('order_id', orderId);
+        await supabase.from('orders').delete().eq('id', orderId);
+      };
+
+      let stockResponse: Response;
+      try {
+        stockResponse = await fetch(`${apiBaseUrl}/api/stock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adjustments: stockAdjustments }),
+        });
+      } catch {
+        await rollbackOrder(order.id);
+        setError(isAr
+          ? 'تعذر الاتصال بالخادم عند تحديث المخزون. يرجى المحاولة مرة أخرى.'
+          : 'The stock update request could not reach the server. Please try again.');
+        return;
+      }
 
       if (!stockResponse.ok) {
         const stockError = await stockResponse.json().catch(() => null);
-        await supabase.from('order_items').delete().eq('order_id', order.id);
-        await supabase.from('orders').delete().eq('id', order.id);
-        throw new Error(
-          stockError?.error || 'Failed to update product stock'
-        );
+        await rollbackOrder(order.id);
+        setError(stockError?.error || (isAr ? 'فشل تحديث المخزون' : 'Failed to update product stock'));
+        return;
       }
 
       // 5. Increment promo usage
@@ -222,7 +235,7 @@ export default function CheckoutPage() {
 
       // 6. Telegram
       try {
-        await fetch('/api/notify', {
+        await fetch(`${apiBaseUrl}/api/notify`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

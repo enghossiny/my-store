@@ -164,7 +164,7 @@ export default async function AdminOrdersPage({
                 )}
                 {order.promo_code && (
                   <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
-                    🎟️ {order.promo_code} — saved ${order.discount}
+                    🎟️ {order.promo_code} — saved EGP {order.discount}
                   </span>
                 )}
               </div>
@@ -195,7 +195,7 @@ export default async function AdminOrdersPage({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f3f4f6' }}>
                 {order.promo_code && (
                   <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
-                    🎟️ {order.promo_code} — saved ${order.discount}
+                    🎟️ {order.promo_code} — saved EGP {order.discount}
                   </span>
                 )}
                 <span style={{ fontSize: '12px', color: '#9ca3af', marginLeft: 'auto' }}>

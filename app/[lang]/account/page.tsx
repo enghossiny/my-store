@@ -410,7 +410,7 @@ function OrdersTab({ lang, userId }: { lang: string; userId: string }) {
                   {isAr ? statusLabel[order.status]?.ar : statusLabel[order.status]?.en}
                 </span>
                 <span style={{ fontWeight: '800', fontSize: '18px', color: '#1a1a2e' }}>
-                  ${order.total}
+                  EGP {order.total}
                 </span>
                 <span style={{ color: '#9ca3af', fontSize: '18px' }}>
                   {expanded === order.id ? '▲' : '▼'}
