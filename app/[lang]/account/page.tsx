@@ -208,18 +208,64 @@ function OverviewTab({ user, lang, isAdmin, setTab }: {
 }) {
   const isAr = lang === 'ar';
   const [stats, setStats] = useState({ total: 0, delivered: 0, pending: 0, spent: 0 });
+  const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refreshStats = () => setRefreshKey(prev => prev + 1);
 
   useEffect(() => {
-    supabase.from('orders').select('status, total').eq('auth_id', user.id).then(({ data }) => {
-      if (!data) return;
+    const loadStats = async () => {
+      setLoading(true);
+      setStats({ total: 0, delivered: 0, pending: 0, spent: 0 });
+
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('orders')
+        .select('status, total')
+        .eq('auth_id', user.id);
+
+      if (error) {
+        console.error('Failed to load account overview stats', error);
+        setLoading(false);
+        return;
+      }
+
+      if (!data) {
+        setLoading(false);
+        return;
+      }
+
       setStats({
         total: data.length,
         delivered: data.filter(o => o.status === 'delivered').length,
         pending: data.filter(o => o.status === 'pending').length,
         spent: data.reduce((s, o) => s + Number(o.total), 0),
       });
-    });
-  }, [user.id]);
+      setLoading(false);
+    };
+
+    void loadStats();
+  }, [user.id, refreshKey]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshStats();
+      }
+    };
+
+    window.addEventListener('focus', refreshStats);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', refreshStats);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   return (
     <div>
@@ -257,6 +303,12 @@ function OverviewTab({ user, lang, isAdmin, setTab }: {
       )}
 
       {/* Stats */}
+      {loading && (
+        <p style={{ margin: '0 0 1rem', color: '#6c63ff', fontSize: '13px', fontWeight: '600' }}>
+          {isAr ? 'تحديث الإحصائيات...' : 'Refreshing stats...'}
+        </p>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
         {[
           { label: isAr ? 'إجمالي الطلبات' : 'Total Orders', value: stats.total, icon: '📦', color: '#6c63ff' },
