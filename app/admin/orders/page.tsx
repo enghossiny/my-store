@@ -4,16 +4,34 @@ import OrderStatusUpdater from './OrderStatusUpdater';
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; search?: string }>;
+  searchParams: Promise<{ status?: string }>;
 }) {
   const filters = await searchParams;
 
+  // Get ALL orders for correct counts — separate from filtered results
+  const { data: allOrders } = await supabase
+    .from('orders')
+    .select('id, status');
+
+  // Count by status from ALL orders
+  const counts = {
+    all: allOrders?.length ?? 0,
+    pending: allOrders?.filter(o => o.status === 'pending').length ?? 0,
+    confirmed: allOrders?.filter(o => o.status === 'confirmed').length ?? 0,
+    shipped: allOrders?.filter(o => o.status === 'shipped').length ?? 0,
+    delivered: allOrders?.filter(o => o.status === 'delivered').length ?? 0,
+    cancelled: allOrders?.filter(o => o.status === 'cancelled').length ?? 0,
+  };
+
+  // Now fetch filtered orders with full data
   let query = supabase
     .from('orders')
     .select('*, order_items(quantity, price, products(name_en, name_ar))')
     .order('created_at', { ascending: false });
 
-  if (filters.status) query = query.eq('status', filters.status);
+  if (filters.status) {
+    query = query.eq('status', filters.status);
+  }
 
   const { data: orders } = await query;
 
@@ -25,66 +43,74 @@ export default async function AdminOrdersPage({
     cancelled: '#ef4444',
   };
 
-  const counts = {
-    all: orders?.length ?? 0,
-    pending: orders?.filter(o => o.status === 'pending').length ?? 0,
-    confirmed: orders?.filter(o => o.status === 'confirmed').length ?? 0,
-    shipped: orders?.filter(o => o.status === 'shipped').length ?? 0,
-    delivered: orders?.filter(o => o.status === 'delivered').length ?? 0,
-    cancelled: orders?.filter(o => o.status === 'cancelled').length ?? 0,
-  };
+  const tabs = [
+    { key: '', label: 'All', count: counts.all },
+    { key: 'pending', label: 'Pending', count: counts.pending },
+    { key: 'confirmed', label: 'Confirmed', count: counts.confirmed },
+    { key: 'shipped', label: 'Shipped', count: counts.shipped },
+    { key: 'delivered', label: 'Delivered', count: counts.delivered },
+    { key: 'cancelled', label: 'Cancelled', count: counts.cancelled },
+  ];
+
+  const currentStatus = filters.status ?? '';
 
   return (
     <div>
+      {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ margin: '0 0 4px', fontSize: '28px', fontWeight: '800' }}>Orders</h1>
-        <p style={{ margin: 0, color: '#9ca3af', fontSize: '14px' }}>{counts.all} total orders</p>
+        <p style={{ margin: 0, color: '#9ca3af', fontSize: '14px' }}>
+          {counts.all} total orders
+          {filters.status && (
+            <span style={{ color: '#6c63ff', fontWeight: '600' }}>
+              {' '}— showing {orders?.length ?? 0} {filters.status}
+            </span>
+          )}
+        </p>
       </div>
 
       {/* Status filter tabs */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        {[
-          { key: '', label: 'All', count: counts.all },
-          { key: 'pending', label: 'Pending', count: counts.pending },
-          { key: 'confirmed', label: 'Confirmed', count: counts.confirmed },
-          { key: 'shipped', label: 'Shipped', count: counts.shipped },
-          { key: 'delivered', label: 'Delivered', count: counts.delivered },
-          { key: 'cancelled', label: 'Cancelled', count: counts.cancelled },
-        ].map((tab) => (
-          <a key={tab.key} href={tab.key ? `/admin/orders?status=${tab.key}` : '/admin/orders'} style={{
-            padding: '8px 16px',
-            borderRadius: '999px',
-            textDecoration: 'none',
-            fontSize: '13px',
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: filters.status === tab.key || (!filters.status && !tab.key)
-              ? 'linear-gradient(135deg, #6c63ff, #e91e8c)'
-              : '#fff',
-            color: filters.status === tab.key || (!filters.status && !tab.key) ? '#fff' : '#6b7280',
-            border: '1px solid #e5e7eb',
-            boxShadow: filters.status === tab.key || (!filters.status && !tab.key)
-              ? '0 4px 12px rgba(108,99,255,0.3)' : 'none',
-          }}>
-            {tab.label}
-            <span style={{
-              background: filters.status === tab.key || (!filters.status && !tab.key)
-                ? 'rgba(255,255,255,0.3)' : '#f3f4f6',
-              padding: '1px 7px',
-              borderRadius: '999px',
-              fontSize: '11px',
-            }}>
-              {tab.count}
-            </span>
-          </a>
-        ))}
+      <div style={{
+        display: 'flex', gap: '8px', marginBottom: '1.5rem',
+        flexWrap: 'wrap',
+      }}>
+        {tabs.map((tab) => {
+          const isActive = currentStatus === tab.key;
+          return (
+            <a
+              key={tab.key}
+              href={tab.key ? `/admin/orders?status=${tab.key}` : '/admin/orders'}
+              style={{
+                padding: '8px 16px', borderRadius: '999px',
+                textDecoration: 'none', fontSize: '13px', fontWeight: '600',
+                display: 'flex', alignItems: 'center', gap: '6px',
+                background: isActive
+                  ? 'linear-gradient(135deg, #6c63ff, #e91e8c)'
+                  : '#fff',
+                color: isActive ? '#fff' : '#6b7280',
+                border: isActive ? 'none' : '1px solid #e5e7eb',
+                boxShadow: isActive ? '0 4px 12px rgba(108,99,255,0.3)' : 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              {tab.label}
+              <span style={{
+                padding: '2px 8px', borderRadius: '999px',
+                fontSize: '11px', fontWeight: '800',
+                background: isActive ? 'rgba(255,255,255,0.25)' : '#f3f4f6',
+                color: isActive ? '#fff' : '#374151',
+                minWidth: '20px', textAlign: 'center',
+              }}>
+                {tab.count}
+              </span>
+            </a>
+          );
+        })}
       </div>
 
       {/* Orders list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {orders?.map((order) => (
+        {orders && orders.length > 0 ? orders.map((order) => (
           <div key={order.id} style={{
             background: '#fff', borderRadius: '16px',
             boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
@@ -92,9 +118,11 @@ export default async function AdminOrdersPage({
           }}>
             {/* Order header */}
             <div style={{
-              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr auto',
               gap: '1rem', padding: '1.25rem 1.5rem',
-              background: '#fafafa', borderBottom: '1px solid #f3f4f6',
+              background: '#fafafa',
+              borderBottom: '1px solid #f3f4f6',
               alignItems: 'center',
             }}>
               <div>
@@ -107,71 +135,52 @@ export default async function AdminOrdersPage({
               </div>
               <div>
                 <p style={{ margin: '0 0 2px', fontSize: '11px', color: '#9ca3af', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Customer
+                  Phone
                 </p>
-                <p style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>{order.phone}</p>
+                <p style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>
+                  {order.phone}
+                </p>
               </div>
               <div>
                 <p style={{ margin: '0 0 2px', fontSize: '11px', color: '#9ca3af', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Total
                 </p>
-                <p style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#6c63ff' }}>
-                  EGP {order.total}
+                <p style={{ margin: 0, fontSize: '20px', fontWeight: '800', color: '#6c63ff' }}>
+                  ${order.total}
                 </p>
               </div>
-              <OrderStatusUpdater orderId={order.id} currentStatus={order.status} />
+              <OrderStatusUpdater
+                orderId={order.id}
+                currentStatus={order.status}
+              />
             </div>
 
             {/* Order body */}
             <div style={{ padding: '1.25rem 1.5rem' }}>
+              {/* Address + Notes */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
                   <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#9ca3af', fontWeight: '600', textTransform: 'uppercase' }}>
                     Delivery Address
                   </p>
-                  <p style={{ margin: 0, fontSize: '14px', color: '#374151' }}>{order.address}</p>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#374151' }}>
+                    {order.address}
+                  </p>
                 </div>
                 {order.notes && (
                   <div>
                     <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#9ca3af', fontWeight: '600', textTransform: 'uppercase' }}>
                       Notes
                     </p>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#374151' }}>{order.notes}</p>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#374151' }}>
+                      {order.notes}
+                    </p>
                   </div>
                 )}
               </div>
 
-              {/* Payment info */}
-              <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #f3f4f6', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{
-                  padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: '700',
-                  background: order.payment_method === 'cod' ? '#f0fdf4' : order.payment_method === 'instapay' ? '#eff6ff' : '#fdf4ff',
-                  color: order.payment_method === 'cod' ? '#16a34a' : order.payment_method === 'instapay' ? '#3b82f6' : '#9333ea',
-                }}>
-                  {order.payment_method === 'cod' ? '💵 Cash on Delivery'
-                    : order.payment_method === 'instapay' ? `📲 InstaPay`
-                    : '📱 Mobile Wallet'}
-                </span>
-                {order.payment_reference && (
-                  <span style={{ fontSize: '13px', color: '#6b7280' }}>
-                    Ref: <strong>{order.payment_reference}</strong>
-                  </span>
-                )}
-                {order.region_name && (
-                  <span style={{ fontSize: '13px', color: '#6b7280' }}>
-                    🚚 {order.region_name} — EGP {order.delivery_fee}
-                  </span>
-                )}
-                {order.promo_code && (
-                  <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
-                    🎟️ {order.promo_code} — saved EGP {order.discount}
-                  </span>
-                )}
-              </div>
-
-
               {/* Items */}
-              <div>
+              <div style={{ marginBottom: '12px' }}>
                 <p style={{ margin: '0 0 8px', fontSize: '11px', color: '#9ca3af', fontWeight: '600', textTransform: 'uppercase' }}>
                   Items
                 </p>
@@ -184,32 +193,77 @@ export default async function AdminOrdersPage({
                     }}>
                       {item.products?.name_en} ×{item.quantity}
                       <span style={{ color: '#6c63ff', marginLeft: '6px', fontWeight: '700' }}>
-                        EGP {(item.price * item.quantity).toFixed(2)}
+                        ${(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Footer */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f3f4f6' }}>
-                {order.promo_code && (
-                  <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
-                    🎟️ {order.promo_code} — saved EGP {order.discount}
+              {/* Footer row */}
+              <div style={{
+                display: 'flex', gap: '10px', flexWrap: 'wrap',
+                alignItems: 'center', paddingTop: '12px',
+                borderTop: '1px solid #f3f4f6',
+              }}>
+                {/* Payment method */}
+                <span style={{
+                  padding: '4px 12px', borderRadius: '999px',
+                  fontSize: '12px', fontWeight: '700',
+                  background: order.payment_method === 'cod' ? '#f0fdf4'
+                    : order.payment_method === 'instapay' ? '#eff6ff'
+                    : '#fdf4ff',
+                  color: order.payment_method === 'cod' ? '#16a34a'
+                    : order.payment_method === 'instapay' ? '#3b82f6'
+                    : '#9333ea',
+                }}>
+                  {order.payment_method === 'cod' ? '💵 Cash on Delivery'
+                    : order.payment_method === 'instapay' ? '📲 InstaPay'
+                    : '📱 Mobile Wallet'}
+                </span>
+
+                {/* Payment reference */}
+                {order.payment_reference && (
+                  <span style={{ fontSize: '13px', color: '#6b7280' }}>
+                    Ref: <strong>{order.payment_reference}</strong>
                   </span>
                 )}
+
+                {/* Region */}
+                {order.region_name && (
+                  <span style={{ fontSize: '13px', color: '#6b7280' }}>
+                    🚚 {order.region_name}
+                    {order.delivery_fee > 0 && ` — $${order.delivery_fee}`}
+                  </span>
+                )}
+
+                {/* Promo */}
+                {order.promo_code && (
+                  <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
+                    🎟️ {order.promo_code} — saved ${order.discount}
+                  </span>
+                )}
+
+                {/* Date */}
                 <span style={{ fontSize: '12px', color: '#9ca3af', marginLeft: 'auto' }}>
-                  {new Date(order.created_at).toLocaleString()}
+                  {new Date(order.created_at).toLocaleString('en-US', {
+                    year: 'numeric', month: 'short',
+                    day: 'numeric', hour: '2-digit', minute: '2-digit',
+                  })}
                 </span>
               </div>
             </div>
           </div>
-        ))}
-
-        {orders?.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: '16px' }}>
+        )) : (
+          <div style={{
+            textAlign: 'center', padding: '4rem',
+            background: '#fff', borderRadius: '16px',
+            border: '2px dashed #e5e7eb',
+          }}>
             <p style={{ fontSize: '48px', margin: '0 0 1rem' }}>📭</p>
-            <p style={{ color: '#9ca3af', fontSize: '16px' }}>No orders found</p>
+            <p style={{ color: '#9ca3af', fontSize: '16px', margin: 0 }}>
+              No {filters.status ?? ''} orders found
+            </p>
           </div>
         )}
       </div>
