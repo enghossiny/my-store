@@ -15,15 +15,18 @@ export default async function AdminProductsPage() {
     .select('*, categories(name_en)')
     .order('created_at', { ascending: false });
 
-  const typedProducts = (products ?? []) as Array<{
-    id: string;
-    name_en: string;
-    name_ar: string;
-    price: number;
-    stock: number;
-    images?: string[] | null;
-    categories?: { name_en?: string | null } | null;
-  }>;
+    const typedProducts = (products ?? []) as Array<{
+      id: string;
+      name_en: string;
+      name_ar: string;
+      description_en: string | null;
+      description_ar: string | null;
+      category_id: string | null;
+      price: number;
+      stock: number | null;
+      images: string[] | null;
+      categories?: { name_en?: string | null } | null;
+    }>;
 
   const { data: categories } = await supabase
     .from('categories')
@@ -70,11 +73,13 @@ export default async function AdminProductsPage() {
               }
               <div style={{
                 position: 'absolute', top: '10px', right: '10px',
-                background: product.stock < 10 ? '#fef2f2' : '#f0fdf4',
-                color: product.stock < 10 ? '#ef4444' : '#16a34a',
+
+                background: (product.stock ?? 0) < 10 ? '#fef2f2' : '#f0fdf4',
+                color: (product.stock ?? 0) < 10 ? '#ef4444' : '#16a34a',
+
                 padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: '700',
               }}>
-                Stock: {product.stock}
+                Stock: {product.stock ?? 0}
               </div>
             </div>
 

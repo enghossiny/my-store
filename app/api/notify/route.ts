@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
     if (!token || !chatId) {
+      console.error('Telegram notify route missing configuration');
       return NextResponse.json({ error: 'Telegram not configured' }, { status: 500 });
     }
 
@@ -79,8 +80,9 @@ ${discount ? `🎟️ *Promo:* ${promoCode} (−${formatPrice(parseFloat(discoun
       if (!telegramSent) {
         console.warn('Telegram send failed', result);
       }
-    } catch {
+    } catch (err) {
       clearTimeout(timeoutId);
+      console.error('Telegram notify request failed:', err);
     }
 
     // Return success for the main API even if Telegram failed, to avoid cascading failures.

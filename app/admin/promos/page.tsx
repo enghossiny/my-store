@@ -4,18 +4,35 @@ const supabase = supabaseAdmin;
 import PromoForm from './PromoForm';
 import DeletePromoButton from './DeletePromoButton';
 import TogglePromoButton from './TogglePromoButton';
+import { formatPrice } from '@/lib/currency';
+
+
+type PromoCode = {
+  id: string;
+  code: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  min_order_amount: number | null;
+  max_uses: number | null;
+  used_count: number | null;
+  active: boolean;
+  expires_at: string | null;
+  created_at: string | null;
+};
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPromosPage() {
-  const { data: promos } = await supabase
-    .from('promo_codes')
-    .select('*')
-    .order('created_at', { ascending: false });
+const { data } = await supabase
+  .from('promo_codes')
+  .select('*')
+  .order('created_at', { ascending: false });
 
-  const activeCount = promos?.filter(p => p.active).length ?? 0;
-  const totalUses = promos?.reduce((s, p) => s + p.used_count, 0) ?? 0;
+const promos = (data ?? []) as PromoCode[];
+
+const activeCount = promos.filter((p) => p.active).length;
+const totalUses = promos.reduce((s, p) => s + (p.used_count ?? 0), 0);
 
   return (
     <div>
@@ -93,13 +110,13 @@ export default async function AdminPromosPage() {
                 }}>
                   {promo.discount_type === 'percentage' ? `${promo.discount_value}% off` : `${formatPrice(promo.discount_value)} off`}
                 </span>
-                {promo.min_order_amount > 0 && (
+                {(promo.min_order_amount ?? 0) > 0 && (
                   <span style={{ padding: '3px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '600', background: '#f3f4f6', color: '#6b7280' }}>
-                    Min: {formatPrice(promo.min_order_amount)}
+                    Min: {formatPrice(promo.min_order_amount ?? 0)}
                   </span>
                 )}
                 <span style={{ padding: '3px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '600', background: '#f3f4f6', color: '#6b7280' }}>
-                  {promo.used_count}{promo.max_uses ? `/${promo.max_uses}` : ''} uses
+                  {promo.used_count ?? 0}{promo.max_uses ? `/${promo.max_uses}` : ''} uses
                 </span>
                 {promo.expires_at && (
                   <span style={{ padding: '3px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '600', background: '#fef2f2', color: '#ef4444' }}>

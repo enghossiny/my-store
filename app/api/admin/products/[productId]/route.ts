@@ -24,7 +24,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ prod
     return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
   }
 
-  const { error, data } = await supabaseAdmin.from('products').update({
+const { error, data } = await (supabaseAdmin as any).from('products').update({
     name_en,
     name_ar,
     description_en,
@@ -48,7 +48,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ p
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { error } = await supabaseAdmin.from('products').delete().eq('id', productId);
+const { error } = await (supabaseAdmin as any).from('products').delete().eq('id', productId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { formatPrice } from '@/lib/currency';
 
 type PromoResult = {
   code: string;

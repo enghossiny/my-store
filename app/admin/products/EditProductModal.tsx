@@ -7,9 +7,15 @@ import ImageUploader from '@/components/ImageUploader';
 
 type Category = { id: string; name_en: string; name_ar: string };
 type Product = {
-  id: string; name_en: string; name_ar: string;
-  description_en: string; description_ar: string;
-  price: number; stock: number; category_id: string; images: string[];
+  id: string;
+  name_en: string;
+  name_ar: string;
+  description_en: string | null;
+  description_ar: string | null;
+  price: number;
+  stock: number | null;
+  category_id: string | null;
+  images: string[] | null;
 };
 
 export default function EditProductModal({

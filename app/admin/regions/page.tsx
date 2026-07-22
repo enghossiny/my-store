@@ -6,14 +6,27 @@ import DeleteRegionButton from './DeleteRegionButton';
 import ToggleRegionButton from './ToggleRegionButton';
 import EditRegionButton from './EditRegionButton';
 
+import { formatPrice } from '@/lib/currency';
+
+type Region = {
+  id: string;
+  name_en: string;
+  name_ar: string;
+  delivery_fee: number;
+  active: boolean;
+  created_at: string | null;
+};
+
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 export default async function AdminRegionsPage() {
-  const { data: regions } = await supabase
-    .from('delivery_regions')
-    .select('*')
-    .order('delivery_fee', { ascending: true });
+    const { data } = await supabase
+      .from('delivery_regions')
+      .select('*')
+      .order('delivery_fee', { ascending: true });
+
+    const regions = (data ?? []) as Region[];
 
   return (
     <div>

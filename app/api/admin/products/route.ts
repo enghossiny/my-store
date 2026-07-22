@@ -23,16 +23,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
   }
 
-  const { error, data } = await supabaseAdmin.from('products').insert({
-    name_en,
-    name_ar,
-    description_en,
-    description_ar,
-    price: parseFloat(price),
-    stock: parseInt(stock, 10) || 0,
-    category_id: category_id || null,
-    images,
-  }).select().single();
+const insertData = {
+  name_en,
+  name_ar,
+  description_en,
+  description_ar,
+  price: parseFloat(price),
+  stock: parseInt(stock, 10) || 0,
+  category_id: category_id || null,
+  images,
+};
+
+const { error, data } = await (supabaseAdmin as any)
+  .from('products')
+  .insert(insertData)
+  .select()
+  .single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });

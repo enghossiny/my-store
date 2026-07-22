@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
   }
 
-  const { error, data } = await supabaseAdmin.from('delivery_regions').insert({
+  const { error, data } = await (supabaseAdmin as any).from('delivery_regions').insert({
     name_en,
     name_ar,
     delivery_fee: parseFloat(delivery_fee),

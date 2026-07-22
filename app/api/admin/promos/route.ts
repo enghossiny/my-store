@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
+
   const {
     code,
     discount_type,
@@ -18,10 +19,13 @@ export async function POST(req: NextRequest) {
   } = body;
 
   if (!code || discount_value == null || !discount_type) {
-    return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Required fields are missing' },
+      { status: 400 }
+    );
   }
 
-  const { error, data } = await supabaseAdmin.from('promo_codes').insert({
+  const insertData = {
     code: code.trim().toUpperCase(),
     discount_type,
     discount_value: parseFloat(discount_value),
@@ -29,11 +33,20 @@ export async function POST(req: NextRequest) {
     max_uses: max_uses ? parseInt(max_uses, 10) : null,
     expires_at: expires_at || null,
     active: true,
-  }).select().single();
+  };
+
+  const { error, data } = await (supabaseAdmin as any)
+    .from('promo_codes')
+    .insert(insertData)
+    .select()
+    .single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json({ success: true, promo: data });
+  return NextResponse.json({
+    success: true,
+    promo: data,
+  });
 }

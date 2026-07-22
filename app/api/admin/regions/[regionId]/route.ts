@@ -13,7 +13,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ re
     return NextResponse.json({ error: 'Missing active state' }, { status: 400 });
   }
 
-  const { error, data } = await supabaseAdmin.from('delivery_regions').update({ active }).eq('id', regionId).select().single();
+const { error, data } = await (supabaseAdmin as any)
+  .from('delivery_regions')
+  .update({ active })
+  .eq('id', regionId)
+  .select()
+  .single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
@@ -33,11 +38,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ regi
     return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
   }
 
-  const { error, data } = await supabaseAdmin.from('delivery_regions').update({
+const { error, data } = await (supabaseAdmin as any)
+  .from('delivery_regions')
+  .update({
     name_en,
     name_ar,
     delivery_fee: parseFloat(delivery_fee),
-  }).eq('id', regionId).select().single();
+  })
+  .eq('id', regionId)
+  .select()
+  .single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
@@ -52,7 +62,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ r
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { error } = await supabaseAdmin.from('delivery_regions').delete().eq('id', regionId);
+const { error } = await (supabaseAdmin as any)
+  .from('delivery_regions')
+  .delete()
+  .eq('id', regionId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
