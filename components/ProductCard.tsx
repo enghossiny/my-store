@@ -3,34 +3,22 @@
 import Link from 'next/link';
 
 type Product = {
-  id: string;
-  name_ar: string;
-  name_en: string;
-  price: number;
-  images: string[];
-  stock: number;
+  id: string; name_ar: string; name_en: string;
+  price: number; images: string[]; stock: number;
 };
 
-export default function ProductCard({
-  product,
-  lang,
-}: {
-  product: Product;
-  lang: string;
-}) {
+export default function ProductCard({ product, lang }: { product: Product; lang: string }) {
   const isAr = lang === 'ar';
   const name = isAr ? product.name_ar : product.name_en;
 
   return (
-    <Link href={`/${lang}/product/${product.id}`} style={{ textDecoration: 'none' }}>
+    <Link href={`/${lang}/product/${product.id}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div style={{
-        background: '#fff',
-        borderRadius: '20px',
-        overflow: 'hidden',
+        background: '#fff', borderRadius: '16px', overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(108,99,255,0.08)',
         border: '1px solid rgba(108,99,255,0.1)',
         transition: 'transform 0.2s, box-shadow 0.2s',
-        cursor: 'pointer',
+        cursor: 'pointer', height: '100%',
       }}
         onMouseEnter={e => {
           (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)';
@@ -41,81 +29,60 @@ export default function ProductCard({
           (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 20px rgba(108,99,255,0.08)';
         }}
       >
-        <div style={{
-          width: '100%',
-          height: '200px',
-          background: 'linear-gradient(135deg, #f8f7ff 0%, #ede9ff 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '64px',
-          position: 'relative',
+        {/* Image */}
+        <div className="product-card-image" style={{
+          width: '100%', height: '200px',
+          background: 'linear-gradient(135deg, #f8f7ff, #ede9ff)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '56px', position: 'relative', overflow: 'hidden',
         }}>
           {product.images?.[0]
-            ? <img src={product.images[0]} alt={name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <img src={product.images[0]} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : '🛍️'
           }
           {product.stock === 0 && (
             <div style={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              background: '#ef4444',
-              color: '#fff',
-              fontSize: '11px',
-              fontWeight: '700',
-              padding: '4px 10px',
-              borderRadius: '999px',
+              position: 'absolute', top: '8px', right: '8px',
+              background: '#ef4444', color: '#fff',
+              fontSize: '10px', fontWeight: '700',
+              padding: '3px 8px', borderRadius: '999px',
             }}>
               {isAr ? 'نفذ' : 'Out of Stock'}
             </div>
           )}
           {product.stock > 0 && product.stock < 10 && (
             <div style={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              background: '#f59e0b',
-              color: '#fff',
-              fontSize: '11px',
-              fontWeight: '700',
-              padding: '4px 10px',
-              borderRadius: '999px',
+              position: 'absolute', top: '8px', right: '8px',
+              background: '#f59e0b', color: '#fff',
+              fontSize: '10px', fontWeight: '700',
+              padding: '3px 8px', borderRadius: '999px',
             }}>
               {isAr ? 'كمية محدودة' : 'Low Stock'}
             </div>
           )}
         </div>
 
-        <div style={{ padding: '1rem 1.25rem' }}>
-          <h3 style={{
-            margin: '0 0 8px',
-            fontSize: '15px',
-            fontWeight: '600',
-            color: '#1a1a2e',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
+        {/* Info */}
+        <div style={{ padding: '0.875rem 1rem' }}>
+          <h3 className="product-card-name" style={{
+            margin: '0 0 6px', fontSize: '14px', fontWeight: '600',
+            color: '#1a1a2e', overflow: 'hidden',
+            textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {name}
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{
-              fontSize: '20px',
-              fontWeight: '800',
+            <span className="product-card-price" style={{
+              fontSize: '18px', fontWeight: '800',
               background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>
-              EGP {product.price}
+              ${product.price}
             </span>
             <span style={{
               background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
-              color: '#fff',
-              fontSize: '12px',
-              fontWeight: '600',
-              padding: '5px 12px',
-              borderRadius: '999px',
+              color: '#fff', fontSize: '11px', fontWeight: '600',
+              padding: '4px 10px', borderRadius: '999px',
             }}>
               {isAr ? 'عرض' : 'View'}
             </span>

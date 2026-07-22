@@ -1,3 +1,4 @@
+import '@/app/globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { CartProvider } from '@/lib/cartContext';
@@ -17,12 +18,7 @@ export default async function LocaleLayout({
   const isRTL = lang === 'ar';
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'} style={{
-      fontFamily: isRTL ? 'Tajawal, sans-serif' : 'Poppins, sans-serif',
-      background: '#f8f7ff',
-      color: '#1a1a2e',
-      minHeight: '100vh',
-    }}>
+    <div dir={isRTL ? 'rtl' : 'ltr'} style={{ minHeight: '100vh' }}>
       <NextIntlClientProvider messages={messages}>
         <AuthProvider>
           <CartProvider>
