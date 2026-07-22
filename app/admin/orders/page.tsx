@@ -1,5 +1,8 @@
-import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+
+const supabase = supabaseAdmin;
 import OrderStatusUpdater from './OrderStatusUpdater';
+import { formatPrice } from '@/lib/currency';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -16,14 +19,16 @@ export default async function AdminOrdersPage({
     .from('orders')
     .select('id, status');
 
+  const typedAllOrders = (allOrders ?? []) as Array<{ id: string; status: string }>;
+
   // Count by status from ALL orders
   const counts = {
-    all: allOrders?.length ?? 0,
-    pending: allOrders?.filter(o => o.status === 'pending').length ?? 0,
-    confirmed: allOrders?.filter(o => o.status === 'confirmed').length ?? 0,
-    shipped: allOrders?.filter(o => o.status === 'shipped').length ?? 0,
-    delivered: allOrders?.filter(o => o.status === 'delivered').length ?? 0,
-    cancelled: allOrders?.filter(o => o.status === 'cancelled').length ?? 0,
+    all: typedAllOrders.length,
+    pending: typedAllOrders.filter((o) => o.status === 'pending').length,
+    confirmed: typedAllOrders.filter((o) => o.status === 'confirmed').length,
+    shipped: typedAllOrders.filter((o) => o.status === 'shipped').length,
+    delivered: typedAllOrders.filter((o) => o.status === 'delivered').length,
+    cancelled: typedAllOrders.filter((o) => o.status === 'cancelled').length,
   };
 
   // Now fetch filtered orders with full data
@@ -37,6 +42,26 @@ export default async function AdminOrdersPage({
   }
 
   const { data: orders } = await query;
+  const typedOrders = (orders ?? []) as Array<{
+    id: string;
+    status: string;
+    phone: string;
+    address: string;
+    notes?: string | null;
+    total: number;
+    payment_method?: string;
+    payment_reference?: string | null;
+    region_name?: string | null;
+    promo_code?: string | null;
+    discount?: number | null;
+    delivery_fee: number;
+    order_items?: Array<{
+      quantity: number;
+      price: number;
+      products?: { name_en?: string | null; name_ar?: string | null } | null;
+    }>;
+    created_at: string;
+  }>;
 
   const statusColor: Record<string, string> = {
     pending: '#f59e0b',
@@ -66,7 +91,7 @@ export default async function AdminOrdersPage({
           {counts.all} total orders
           {filters.status && (
             <span style={{ color: '#6c63ff', fontWeight: '600' }}>
-              {' '}— showing {orders?.length ?? 0} {filters.status}
+              {' '}— showing {typedOrders.length} {filters.status}
             </span>
           )}
         </p>
@@ -113,7 +138,7 @@ export default async function AdminOrdersPage({
 
       {/* Orders list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {orders && orders.length > 0 ? orders.map((order) => (
+        {typedOrders.length > 0 ? typedOrders.map((order) => (
           <div key={order.id} style={{
             background: '#fff', borderRadius: '16px',
             boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
@@ -149,7 +174,7 @@ export default async function AdminOrdersPage({
                   Total
                 </p>
                 <p style={{ margin: 0, fontSize: '20px', fontWeight: '800', color: '#6c63ff' }}>
-                  EGP {Number(order.total).toFixed(2)}
+                  {formatPrice(order.total)}
                 </p>
               </div>
               <OrderStatusUpdater
@@ -196,7 +221,7 @@ export default async function AdminOrdersPage({
                     }}>
                       {item.products?.name_en} ×{item.quantity}
                       <span style={{ color: '#6c63ff', marginLeft: '6px', fontWeight: '700' }}>
-                        EGP {(item.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -236,14 +261,14 @@ export default async function AdminOrdersPage({
                 {order.region_name && (
                   <span style={{ fontSize: '13px', color: '#6b7280' }}>
                     🚚 {order.region_name}
-                    {order.delivery_fee > 0 && ` — EGP ${Number(order.delivery_fee).toFixed(2)}`}
+                    {order.delivery_fee > 0 && ` — ${formatPrice(order.delivery_fee)}`}
                   </span>
                 )}
 
                 {/* Promo */}
                 {order.promo_code && (
                   <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
-                    🎟️ {order.promo_code} — saved EGP {Number(order.discount).toFixed(2)}
+                    🎟️ {order.promo_code} — saved {formatPrice(order.discount ?? 0)}
                   </span>
                 )}
 

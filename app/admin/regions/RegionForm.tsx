@@ -73,7 +73,7 @@ export default function RegionForm() {
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
-            DELIVERY FEE (EGP) *
+            DELIVERY FEE ({process.env.NEXT_PUBLIC_CURRENCY ?? 'EGP'}) *
           </label>
           <input name="delivery_fee" value={form.delivery_fee} onChange={handleChange}
             type="number" placeholder="20" style={inputStyle} />

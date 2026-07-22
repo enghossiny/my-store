@@ -1,4 +1,6 @@
-import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+
+const supabase = supabaseAdmin;
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -8,6 +10,16 @@ export default async function AdminCustomersPage() {
     .from('customers')
     .select('*, orders(id)')
     .order('created_at', { ascending: false });
+
+  const typedCustomers = (customers ?? []) as Array<{
+    id: string;
+    name: string;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    created_at: string;
+    orders?: Array<{ id: string }>;
+  }>;
 
   return (
     <div>
@@ -37,7 +49,7 @@ export default async function AdminCustomersPage() {
             </tr>
           </thead>
           <tbody>
-            {customers?.map((customer) => (
+            {typedCustomers.map((customer) => (
               <tr key={customer.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                 <td style={{ padding: '12px 16px', fontWeight: '500' }}>{customer.name}</td>
                 <td style={{ padding: '12px 16px', fontSize: '14px', color: '#6b7280' }}>
@@ -73,7 +85,7 @@ export default async function AdminCustomersPage() {
           </tbody>
         </table>
 
-        {customers?.length === 0 && (
+        {typedCustomers.length === 0 && (
           <p style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
             No customers yet
           </p>

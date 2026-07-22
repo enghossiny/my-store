@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPrice } from '@/lib/currency';
 import Link from 'next/link';
 
 type Product = {
@@ -77,7 +78,7 @@ export default function ProductCard({ product, lang }: { product: Product; lang:
               background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>
-              ${product.price}
+              {formatPrice(product.price)}
             </span>
             <span style={{
               background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',

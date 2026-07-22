@@ -8,6 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PromoCode from '@/components/PromoCode';
 import SavedAddresses from '@/components/SavedAddresses';
+import { formatPrice } from '@/lib/currency';
 
 type PromoResult = {
   code: string;
@@ -184,16 +185,38 @@ export default function CheckoutPage() {
         .select('id').single();
       if (orderError) throw orderError;
 
-      // 3. Save order items
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(items.map((item) => ({
-          order_id: order.id,
-          product_id: item.id,
-          quantity: item.quantity,
-          price: item.price,
-        })));
-      if (itemsError) throw itemsError;
+      
+        // 3. Check stock availability first
+          for (const item of items) {
+            const { data: product, error: stockCheckError } = await supabase
+              .from('products')
+              .select('stock, name_en, name_ar')
+              .eq('id', item.id)
+              .single();
+
+            if (stockCheckError || !product) {
+              throw new Error(isAr ? 'خطأ في التحقق من المخزون' : 'Error checking stock');
+            }
+
+            if (product.stock < item.quantity) {
+              throw new Error(
+                isAr
+                  ? `الكمية المطلوبة غير متوفرة لـ ${product.name_ar}`
+                  : `Not enough stock for "${product.name_en}" (available: ${product.stock})`
+              );
+            }
+          }
+
+          // 4. Save order items
+          const { error: itemsError } = await supabase
+            .from('order_items')
+            .insert(items.map((item) => ({
+              order_id: order.id,
+              product_id: item.id,
+              quantity: item.quantity,
+              price: item.price,
+            })));
+          if (itemsError) throw itemsError;
 
       // 4. Decrease product stock for ordered items
       const stockAdjustments = items.map((item) => ({
@@ -267,7 +290,8 @@ export default function CheckoutPage() {
 
     } catch (err) {
       console.error(err);
-      setError(isAr ? 'حدث خطأ، يرجى المحاولة مجدداً' : 'Something went wrong, please try again');
+      const errMsg = err instanceof Error ? err.message : '';
+      setError(errMsg || (isAr ? 'حدث خطأ، يرجى المحاولة مجدداً' : 'Something went wrong, please try again'));
     } finally {
       setLoading(false);
     }
@@ -419,13 +443,13 @@ export default function CheckoutPage() {
                       <option value="">{isAr ? 'اختر منطقتك' : 'Select your region'}</option>
                       {regions.map((r) => (
                         <option key={r.id} value={r.id}>
-                          {isAr ? r.name_ar : r.name_en} — EGP {r.delivery_fee}
+                          {isAr ? r.name_ar : r.name_en} — {formatPrice(r.delivery_fee)}
                         </option>
                       ))}
                     </select>
                     {selectedRegion && (
                       <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#6c63ff', fontWeight: '600' }}>
-                        🚚 {isAr ? 'رسوم التوصيل:' : 'Delivery fee:'} EGP {selectedRegion.delivery_fee}
+                        🚚 {isAr ? 'رسوم التوصيل:' : 'Delivery fee:'} {formatPrice(selectedRegion.delivery_fee)}
                       </p>
                     )}
                   </div>
@@ -467,7 +491,7 @@ export default function CheckoutPage() {
                 <p style={{ margin: '0 0 2px', fontSize: '14px', color: '#374151' }}>{form.address}</p>
                 {selectedRegion && (
                   <p style={{ margin: 0, fontSize: '13px', color: '#6c63ff', fontWeight: '600' }}>
-                    🚚 {isAr ? selectedRegion.name_ar : selectedRegion.name_en} — EGP {selectedRegion.delivery_fee}
+                    🚚 {isAr ? selectedRegion.name_ar : selectedRegion.name_en} — {formatPrice(selectedRegion.delivery_fee)}
                   </p>
                 )}
               </div>
@@ -626,11 +650,11 @@ export default function CheckoutPage() {
                       {isAr ? item.name_ar : item.name_en}
                     </p>
                     <p style={{ margin: 0, fontSize: '12px', color: '#9ca3af' }}>
-                      EGP {item.price} × {item.quantity}
+                      {formatPrice(item.price)} × {item.quantity}
                     </p>
                   </div>
                   <p style={{ margin: 0, fontWeight: '700' }}>
-                    EGP {(item.price * item.quantity).toFixed(2)}
+                    {formatPrice(item.price * item.quantity)}
                   </p>
                 </div>
               ))}
@@ -638,7 +662,7 @@ export default function CheckoutPage() {
               <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid #f3f4f6', background: '#fafafa' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <span style={{ fontSize: '14px', color: '#6b7280' }}>{isAr ? 'المجموع الفرعي' : 'Subtotal'}</span>
-                  <span style={{ fontSize: '14px', fontWeight: '600' }}>EGP {total.toFixed(2)}</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600' }}>{formatPrice(total)}</span>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -647,14 +671,14 @@ export default function CheckoutPage() {
                     {selectedRegion && <span style={{ fontSize: '12px', color: '#9ca3af', marginLeft: '4px' }}>({isAr ? selectedRegion.name_ar : selectedRegion.name_en})</span>}
                   </span>
                   <span style={{ fontSize: '14px', fontWeight: '600', color: selectedRegion ? '#374151' : '#9ca3af' }}>
-                    {selectedRegion ? `EGP ${deliveryFee.toFixed(2)}` : (isAr ? 'اختر المنطقة' : 'Select region')}
+                    {selectedRegion ? `${formatPrice(deliveryFee)}` : (isAr ? 'اختر المنطقة' : 'Select region')}
                   </span>
                 </div>
 
                 {discount > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontSize: '14px', color: '#16a34a', fontWeight: '600' }}>🎟️ {promo?.code}</span>
-                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#16a34a' }}>− EGP {discount.toFixed(2)}</span>
+                    <span style={{ fontSize: '14px', fontWeight: '700', color: '#16a34a' }}>− {formatPrice(discount)}</span>
                   </div>
                 )}
 
@@ -677,7 +701,7 @@ export default function CheckoutPage() {
                       background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
                       WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                     }}>
-                      EGP {finalTotal.toFixed(2)}
+                      {formatPrice(finalTotal)}
                     </span>
                   </div>
                 </div>

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import AddToCartButton from '@/components/AddToCartButton';
 import Link from 'next/link';
 import ProductGallery from '@/components/ProductGallery';
+import { formatPrice } from '@/lib/currency';
 
 export default async function ProductPage({
   params,
@@ -106,7 +107,7 @@ export default async function ProductPage({
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}>
-                EGP {product.price}
+                {formatPrice(product.price)}
               </span>
             </div>
 
@@ -167,6 +168,7 @@ export default async function ProductPage({
               }}
               lang={lang}
               disabled={product.stock === 0}
+              stock={product.stock}
             />
 
             {/* Delivery info */}
@@ -211,39 +213,39 @@ export default async function ProductPage({
               gridTemplateColumns: 'repeat(4, 1fr)',
               gap: '1rem',
             }}>
-              {related.map((p) => (
-                <Link key={p.id} href={`/${lang}/product/${p.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    background: '#fff', borderRadius: '16px',
-                    overflow: 'hidden', border: '1px solid #f3f4f6',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
-                    transition: 'transform 0.2s',
-                  }}>
+                {related.map((p) => (
+                  <Link key={p.id} href={`/${lang}/product/${p.id}`} style={{ textDecoration: 'none' }}>
                     <div style={{
-                      height: '140px',
-                      background: 'linear-gradient(135deg, #f8f7ff, #ede9ff)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '40px',
+                      background: '#fff', borderRadius: '16px',
+                      overflow: 'hidden', border: '1px solid #f3f4f6',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
+                      transition: 'transform 0.2s',
                     }}>
-                      {p.images?.[0]
-                        ? <img src={p.images[0]} alt={isAr ? p.name_ar : p.name_en} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : '🛍️'}
-                    </div>
-                    <div style={{ padding: '10px 12px' }}>
-                      <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '600', color: '#1a1a2e', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {isAr ? p.name_ar : p.name_en}
-                      </p>
-                      <p style={{
-                        margin: 0, fontSize: '15px', fontWeight: '800',
-                        background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
-                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                      <div style={{
+                        height: '140px',
+                        background: 'linear-gradient(135deg, #f8f7ff, #ede9ff)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '40px',
                       }}>
-                        EGP {p.price}
-                      </p>
+                        {p.images?.[0]
+                          ? <img src={p.images[0]} alt={isAr ? p.name_ar : p.name_en} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : '🛍️'}
+                      </div>
+                      <div style={{ padding: '10px 12px' }}>
+                        <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '600', color: '#1a1a2e', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {isAr ? p.name_ar : p.name_en}
+                        </p>
+                        <p style={{
+                          margin: 0, fontSize: '15px', fontWeight: '800',
+                          background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
+                          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                        }}>
+                          {formatPrice(p.price)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
             </div>
           </div>
         )}

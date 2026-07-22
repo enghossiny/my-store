@@ -59,8 +59,8 @@ export default function PromoCode({ lang, orderTotal, onApply }: Props) {
     if (orderTotal < data.min_order_amount) {
       setError(
         isAr
-          ? `الحد الأدنى للطلب EGP ${data.min_order_amount}`
-          : `Minimum order amount is EGP ${data.min_order_amount}`
+          ? `الحد الأدنى للطلب ${formatPrice(data.min_order_amount)}`
+          : `Minimum order amount is ${formatPrice(data.min_order_amount)}`
       );
       setLoading(false);
       return;
@@ -113,9 +113,9 @@ export default function PromoCode({ lang, orderTotal, onApply }: Props) {
             <p style={{ margin: 0, fontSize: '12px', color: '#16a34a' }}>
               {applied.discount_type === 'percentage'
                 ? `${applied.discount_value}% ${isAr ? 'خصم' : 'off'}`
-                : `EGP ${applied.discount_value} ${isAr ? 'خصم' : 'off'}`}
+                : `${formatPrice(applied.discount_value)} ${isAr ? 'خصم' : 'off'}`}
               {' — '}
-              {isAr ? 'وفرت' : 'You save'} EGP {applied.discountAmount}
+              {isAr ? 'وفرت' : 'You save'} {formatPrice(applied.discountAmount)}
             </p>
           </div>
         </div>

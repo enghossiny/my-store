@@ -1,4 +1,7 @@
-import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+
+const supabase = supabaseAdmin;
+import { formatPrice } from '@/lib/currency';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -21,11 +24,14 @@ export default async function AdminPage() {
       .limit(8),
   ]);
 
-  const totalRevenue = allOrders?.reduce((sum, o) => sum + Number(o.total), 0) ?? 0;
-  const deliveredRevenue = allOrders?.filter(o => o.status === 'delivered')
-    .reduce((sum, o) => sum + Number(o.total), 0) ?? 0;
-  const pendingOrders = allOrders?.filter(o => o.status === 'pending').length ?? 0;
-  const cancelledOrders = allOrders?.filter(o => o.status === 'cancelled').length ?? 0;
+  const typedAllOrders = (allOrders ?? []) as Array<{ total: number; status: string }>;
+  const typedRecentOrders = (recentOrders ?? []) as Array<{ id: string; total: number; status: string; phone: string; address: string; created_at: string }>;
+
+  const totalRevenue = typedAllOrders.reduce((sum, o) => sum + Number(o.total), 0);
+  const deliveredRevenue = typedAllOrders.filter((o) => o.status === 'delivered')
+    .reduce((sum, o) => sum + Number(o.total), 0);
+  const pendingOrders = typedAllOrders.filter((o) => o.status === 'pending').length;
+  const cancelledOrders = typedAllOrders.filter((o) => o.status === 'cancelled').length;
 
   const statusColor: Record<string, string> = {
     pending: '#f59e0b',
@@ -36,17 +42,17 @@ export default async function AdminPage() {
   };
 
   const stats = [
-    { label: 'Total Revenue', value: `EGP ${totalRevenue.toFixed(2)}`, icon: '💰', color: '#6c63ff', sub: `EGP ${deliveredRevenue.toFixed(2)} delivered` },
+    { label: 'Total Revenue', value: `${formatPrice(totalRevenue)}`, icon: '💰', color: '#6c63ff', sub: `${formatPrice(deliveredRevenue)} delivered` },
     { label: 'Total Orders', value: totalOrders ?? 0, icon: '📦', color: '#e91e8c', sub: `${pendingOrders} pending` },
     { label: 'Products', value: totalProducts ?? 0, icon: '🛍️', color: '#00c9a7', sub: 'in store' },
     { label: 'Customers', value: totalCustomers ?? 0, icon: '👥', color: '#f59e0b', sub: `${cancelledOrders} cancelled orders` },
   ];
 
   // Orders by status breakdown
-  const statusBreakdown = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].map(s => ({
+  const statusBreakdown = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].map((s) => ({
     status: s,
-    count: allOrders?.filter(o => o.status === s).length ?? 0,
-    revenue: allOrders?.filter(o => o.status === s).reduce((sum, o) => sum + Number(o.total), 0) ?? 0,
+    count: typedAllOrders.filter((o) => o.status === s).length,
+    revenue: typedAllOrders.filter((o) => o.status === s).reduce((sum, o) => sum + Number(o.total), 0),
   }));
 
   return (
@@ -105,7 +111,7 @@ export default async function AdminPage() {
                     {s.status}
                   </span>
                   <span style={{ fontSize: '13px', color: '#6b7280' }}>
-                    {s.count} orders — EGP {s.revenue.toFixed(2)}
+                    {s.count} orders — {formatPrice(s.revenue)}
                   </span>
                 </div>
                 <div style={{ background: '#f3f4f6', borderRadius: '999px', height: '6px' }}>
@@ -132,10 +138,10 @@ export default async function AdminPage() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
-              { label: 'Total Revenue (all orders)', value: `EGP ${totalRevenue.toFixed(2)}` },
-              { label: 'Confirmed Revenue', value: `EGP ${allOrders?.filter(o => ['confirmed', 'shipped', 'delivered'].includes(o.status)).reduce((s, o) => s + Number(o.total), 0).toFixed(2)}` },
-              { label: 'Delivered Revenue', value: `EGP ${deliveredRevenue.toFixed(2)}` },
-              { label: 'Average Order Value', value: `EGP ${totalOrders ? (totalRevenue / totalOrders).toFixed(2) : '0.00'}` },
+              { label: 'Total Revenue (all orders)', value: `${formatPrice(totalRevenue)}` },
+              { label: 'Confirmed Revenue', value: `${formatPrice(typedAllOrders.filter((o) => ['confirmed', 'shipped', 'delivered'].includes(o.status)).reduce((s, o) => s + Number(o.total), 0))}` },
+              { label: 'Delivered Revenue', value: `${formatPrice(deliveredRevenue)}` },
+              { label: 'Average Order Value', value: `${formatPrice(totalOrders ? (totalRevenue / totalOrders) : 0)}` },
             ].map((item) => (
               <div key={item.label} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -173,7 +179,7 @@ export default async function AdminPage() {
             </tr>
           </thead>
           <tbody>
-            {recentOrders?.map((order) => (
+            {typedRecentOrders.map((order) => (
               <tr key={order.id} style={{ borderBottom: '1px solid #f9f9f9' }}>
                 <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontSize: '13px', color: '#6b7280' }}>
                   {order.id.slice(0, 8)}...
@@ -184,7 +190,7 @@ export default async function AdminPage() {
                     {order.address}
                   </span>
                 </td>
-                <td style={{ padding: '12px 16px', fontWeight: '700', color: '#1a1a2e' }}>EGP {order.total}</td>
+                <td style={{ padding: '12px 16px', fontWeight: '700', color: '#1a1a2e' }}>{formatPrice(order.total)}</td>
                 <td style={{ padding: '12px 16px' }}>
                   <span style={{
                     padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: '600',

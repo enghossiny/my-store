@@ -1,3 +1,4 @@
+import { formatPrice } from '@/lib/currency';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const itemsList = items
       .map((item: { name: string; quantity: number; price: number }) =>
-        `  • ${item.name} ×${item.quantity} — EGP ${(item.price * item.quantity).toFixed(2)}`
+        `  • ${item.name} ×${item.quantity} — ${formatPrice(item.price * item.quantity)}`
       ).join('\n');
 
     const paymentLabel =
@@ -33,39 +34,57 @@ export async function POST(req: NextRequest) {
 👤 *Customer:* ${customerName}
 📞 *Phone:* ${phone}
 📍 *Address:* ${address}
-🚚 *Region:* ${region} — EGP ${deliveryFee}
+🚚 *Region:* ${region} — ${formatPrice(parseFloat(deliveryFee))}
 ${notes ? `📝 *Notes:* ${notes}` : ''}
 
 🛍️ *Items:*
 ${itemsList}
 
 💳 *Payment:* ${paymentLabel}
-${discount ? `🎟️ *Promo:* ${promoCode} (−EGP ${discount})` : ''}
-🚚 *Delivery:* EGP ${deliveryFee}
-💰 *Total: EGP ${total}*
+${discount ? `🎟️ *Promo:* ${promoCode} (−${formatPrice(parseFloat(discount))}` : ''}
+🚚 *Delivery:* ${formatPrice(parseFloat(deliveryFee))}
+💰 *Total: ${formatPrice(parseFloat(total))}*
 
 🔗 [View in Admin](${process.env.NEXT_PUBLIC_SITE_URL}/admin/orders)
     `.trim();
 
-    const response = await fetch(
-      `https://api.telegram.org/bot${token}/sendMessage`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: 'Markdown',
-        }),
-      }
-    );
+    // Send Telegram message with a timeout and graceful failure handling.
+    let telegramSent = false;
+    const timeoutMs = Number(process.env.TELEGRAM_TIMEOUT_MS ?? 15000);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    const result = await response.json();
-    if (!result.ok) {
-      return NextResponse.json({ error: result.description }, { status: 500 });
+    try {
+      const response = await fetch(
+        `https://api.telegram.org/bot${token}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+          }),
+          signal: controller.signal,
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      const result = await response.json().catch((e) => {
+        console.error('Failed to parse Telegram response', e);
+        return null;
+      });
+
+      telegramSent = Boolean(result?.ok);
+      if (!telegramSent) {
+        console.warn('Telegram send failed', result);
+      }
+    } catch {
+      clearTimeout(timeoutId);
     }
 
-    return NextResponse.json({ success: true });
+    // Return success for the main API even if Telegram failed, to avoid cascading failures.
+    return NextResponse.json({ success: true, telegramSent });
   } catch (err) {
     console.error('Telegram error:', err);
     return NextResponse.json({ error: 'Failed to send notification' }, { status: 500 });

@@ -1,4 +1,6 @@
-import { supabaseAdmin as supabase } from '@/lib/supabaseAdmin';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+
+const supabase = supabaseAdmin;
 import RegionForm from './RegionForm';
 import DeleteRegionButton from './DeleteRegionButton';
 import ToggleRegionButton from './ToggleRegionButton';
@@ -75,7 +77,7 @@ export default async function AdminRegionsPage() {
                     background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
                     WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                   }}>
-                    EGP {region.delivery_fee}
+                    {formatPrice(region.delivery_fee)}
                   </span>
                 </td>
                 <td style={{ padding: '14px 16px' }}>

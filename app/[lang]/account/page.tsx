@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/authContext';
 import { supabase } from '@/lib/supabase';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { formatPrice } from '@/lib/currency';
 
 type Order = {
   id: string;
@@ -314,7 +315,7 @@ function OverviewTab({ user, lang, isAdmin, setTab }: {
           { label: isAr ? 'إجمالي الطلبات' : 'Total Orders', value: stats.total, icon: '📦', color: '#6c63ff' },
           { label: isAr ? 'تم التسليم' : 'Delivered', value: stats.delivered, icon: '✅', color: '#16a34a' },
           { label: isAr ? 'قيد الانتظار' : 'Pending', value: stats.pending, icon: '⏳', color: '#f59e0b' },
-          { label: isAr ? 'إجمالي الإنفاق' : 'Total Spent', value: `EGP ${stats.spent.toFixed(2)}`, icon: '💰', color: '#e91e8c' },
+          { label: isAr ? 'إجمالي الإنفاق' : 'Total Spent', value: `${formatPrice(stats.spent)}`, icon: '💰', color: '#e91e8c' },
         ].map((s) => (
           <div key={s.label} style={{
             background: '#fff', borderRadius: '16px', padding: '1.25rem',
@@ -462,7 +463,7 @@ function OrdersTab({ lang, userId }: { lang: string; userId: string }) {
                   {isAr ? statusLabel[order.status]?.ar : statusLabel[order.status]?.en}
                 </span>
                 <span style={{ fontWeight: '800', fontSize: '18px', color: '#1a1a2e' }}>
-                  EGP {order.total}
+                  {formatPrice(order.total)}
                 </span>
                 <span style={{ color: '#9ca3af', fontSize: '18px' }}>
                   {expanded === order.id ? '▲' : '▼'}
@@ -485,7 +486,7 @@ function OrdersTab({ lang, userId }: { lang: string; userId: string }) {
                         {isAr ? item.products?.name_ar : item.products?.name_en} ×{item.quantity}
                       </span>
                       <span style={{ fontWeight: '700' }}>
-                        EGP {(item.price * item.quantity).toFixed(2)}
+                         {formatPrice(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -495,12 +496,12 @@ function OrdersTab({ lang, userId }: { lang: string; userId: string }) {
                 <div style={{ background: '#fff', borderRadius: '10px', padding: '10px 14px', border: '1px solid #f3f4f6' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
                     <span>{isAr ? 'رسوم التوصيل' : 'Delivery fee'} {order.region_name && `(${order.region_name})`}</span>
-                    <span>EGP {order.delivery_fee ?? 0}</span>
+                    <span> {formatPrice(order.delivery_fee)}</span>
                   </div>
                   {order.discount > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#16a34a', marginBottom: '4px' }}>
                       <span>🎟️ {order.promo_code}</span>
-                      <span>− EGP {order.discount}</span>
+                      <span>− {formatPrice(order.discount)}</span>
                     </div>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', fontSize: '15px', paddingTop: '8px', borderTop: '1px solid #f3f4f6', marginTop: '4px' }}>
@@ -509,7 +510,7 @@ function OrdersTab({ lang, userId }: { lang: string; userId: string }) {
                       background: 'linear-gradient(135deg, #6c63ff, #e91e8c)',
                       WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                     }}>
-                      EGP {order.total}
+                      {formatPrice(order.total)}
                     </span>
                   </div>
                 </div>
@@ -672,7 +673,7 @@ function AddressesTab({ lang, userId }: { lang: string; userId: string }) {
             <select value={form.region_id} onChange={(e) => setForm({ ...form, region_id: e.target.value })} style={inputStyle}>
               <option value="">{isAr ? 'اختر المنطقة' : 'Select region'}</option>
               {regions.map(r => (
-                <option key={r.id} value={r.id}>{isAr ? r.name_ar : r.name_en} — EGP {r.delivery_fee}</option>
+                <option key={r.id} value={r.id}>{isAr ? r.name_ar : r.name_en} — {formatPrice(r.delivery_fee)}</option>
               ))}
             </select>
           </div>
@@ -732,7 +733,7 @@ function AddressesTab({ lang, userId }: { lang: string; userId: string }) {
               <p style={{ margin: '0 0 4px', fontSize: '14px', color: '#374151' }}>{addr.address}</p>
               {addr.region_name_en && (
                 <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#6c63ff', fontWeight: '600' }}>
-                  🚚 {isAr ? addr.region_name_ar : addr.region_name_en} — EGP {addr.delivery_fee}
+                  🚚 {isAr ? addr.region_name_ar : addr.region_name_en} — {formatPrice(addr.delivery_fee)}
                 </p>
               )}
 
